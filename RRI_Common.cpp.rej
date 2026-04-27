@@ -1,0 +1,10 @@
+diff a/RRI_Common.cpp b/RRI_Common.cpp	(rejected hunks)
+@@ -678,7 +678,7 @@
+ 		switch (Lowno) {
+ 			//_______________________________________________________________
+ 			//		1 ��{�t�@�C��
+-			//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++			//
+ 		case 2: strcpy(DS->Proj_Title, inchar);  break;
+ 		case 3: strcpy(DS->Input_names[RAIN_FILE], inchar); DS->in_use[RAIN_FILE] = TRUE;
+ 			DS->Cin_Need++; break;

@@ -1,0 +1,9 @@
+diff a/RRI_Common.h b/RRI_Common.h	(rejected hunks)
+@@ -538,6 +538,7 @@
+ 	//
+ 	///--------------------------------------------- UNDO �p �L����
+ 	int			UndoH, UndoV;
++	int			markH, markV;
+ } PARAMS;
+ #endif
+ #ifndef		_MINFO
