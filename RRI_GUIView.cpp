@@ -75,6 +75,9 @@
 #include	<fcntl.h>
 #include	<list>
 
+// 2026/05/23 Add
+#include "WebRRIInputDlg.h"
+
 // ///////////////////////////////////////////////////////////////////////////////////////
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 extern					CStatusBar*		SB;	
@@ -212,7 +215,7 @@ int			BOUND_ID[] = { IDC_BUTTON_B_201, IDC_BUTTON_B_202, IDC_BUTTON_B_203, IDC_B
 ///
 /////////////////////////////////////////////////////////////////////////////  TAB 3
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
-int			TAB_3_NUM = 68;
+int			TAB_3_NUM = 70;
 
 int			TAB_3_ID[] = {
 	IDC_STATIC_GB_30, IDC_STATIC_GB_31,IDC_STATIC_GB_41, IDC_STATIC_GB_43,
@@ -242,7 +245,8 @@ int			TAB_3_ID[] = {
 
 	IDC_SLIDER_TRANS,  IDC_SLIDER_TRANS2,
 	IDC_COMBO_DATA,
-	IDC_STATIC_GB_REMAIN, IDC_BUTTON_RRI };
+	IDC_STATIC_GB_REMAIN, IDC_BUTTON_RRI, 
+	IDC_RUN_WEB_RRI,IDC_EDIT_WEB_RRI };
 //
 int			MESH_COLOR_ID[] = { IDC_MESHCOLOR_1, IDC_MESHCOLOR_2, IDC_MESHCOLOR_3, IDC_MESHCOLOR_6,
 				IDC_MESHCOLOR_7, IDC_MESHCOLOR_8, IDC_MESHCOLOR_9, IDC_MESHCOLOR_10, IDC_MESHCOLOR_11 };
@@ -252,13 +256,14 @@ int			DIRECT_ID[] = {	IDC_RADIO_E,IDC_RADIO_SE,IDC_RADIO_S,
 							IDC_RADIO_N, IDC_RADIO_NE,IDC_RADIO_TERM};
 
 ///------------------------------------------------------------------------------- Avail Buttons
-int		AVAIL_NUM[3]		= { 6, 6, 9 };
+int		AVAIL_NUM[3]		= { 6, 6, 11 };
 int		TAB_1_AVAIL[6] = { IDC_BUTTON_104, IDC_BUTTON_105, IDC_BUTTON_UNDO, IDC_BUTTON_CSPARAM,	// Add 201601 20190201 Modify [4] -> [5]
 							IDC_BUTTON_LANDUSE_JP, IDC_BUTTON_LANDUSE_JP2};	// 20190201 Add
 int		TAB_2_AVAIL[6] = { IDC_BUTTON_201, IDC_BUTTON_206,IDC_BUTTON_207, IDC_BUTTON_208, IDC_BUTTON_210 ,IDC_BUTTON_214}; 
-int		TAB_3_AVAIL[9]	= { IDC_BUTTON_401, IDC_BUTTON_404, 
+int		TAB_3_AVAIL[11]	= { IDC_BUTTON_401, IDC_BUTTON_404, 
 							IDC_CHECK_OP_1, IDC_CHECK_OP_2, IDC_CHECK_OP_3, IDC_CHECK_OP_6, IDC_CHECK_OP_7,
-							IDC_SLIDER_TRANS,IDC_SLIDER_TRANS2 };
+							IDC_SLIDER_TRANS,IDC_SLIDER_TRANS2,
+							IDC_RUN_WEB_RRI,IDC_EDIT_WEB_RRI };
 int		UTM_INAVAIL[3] = { IDC_BUTTON_207, IDC_BUTTON_208, IDC_BUTTON_212 };
 ///------------------------------------------------------------------------------- Avail Buttons
 // FILE_IN_NUM = 21  -> 29   2014/12     FILE_OUT_NUM  -> 10
@@ -500,7 +505,9 @@ BEGIN_MESSAGE_MAP(CRRI_GUIView, CFormView)
 	ON_BN_CLICKED(IDC_BUTTON_LANDUSE_JP2, &CRRI_GUIView::OnBnClickedButtonLanduseJp2)
 	ON_STN_CLICKED(IDC_STATIC_214, &CRRI_GUIView::OnStnClickedStatic214)
 	ON_BN_CLICKED(IDC_BTN_SETSEDIM, &CRRI_GUIView::OnBnClickedBtnSetsedim)
-END_MESSAGE_MAP()
+		ON_BN_CLICKED(IDC_RUN_WEB_RRI, &CRRI_GUIView::OnBnClickedRunWebRri)
+		ON_BN_CLICKED(IDC_EDIT_WEB_RRI, &CRRI_GUIView::OnBnClickedEditWebRri)
+		END_MESSAGE_MAP()
 
 
 std::vector<std::string> get_file_path_in_dir(const std::string& dir_name, const std::string& extension) noexcept(false);
@@ -11605,3 +11612,17 @@ bool CRRI_GUIView::SaveSedInputFile() {
 
 	return true;
 }
+
+
+void CRRI_GUIView::OnBnClickedEditWebRri()
+{
+	CWebRRIInputDlg dlg;
+	dlg.DoModal();
+}
+
+void CRRI_GUIView::OnBnClickedRunWebRri()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+}
+
+

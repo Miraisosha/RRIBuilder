@@ -222,6 +222,14 @@
     <ClInclude Include="CommFuncs.h" />
     <ClInclude Include="CommGL.h" />
     <ClInclude Include="CSetSedNo.h" />
+    <ClInclude Include="CWebRRIPageBoundaryDlg.h" />
+    <ClInclude Include="CWebRRIPageCalibrationDlg.h" />
+    <ClInclude Include="CWebRRIPageDamDlg.h" />
+    <ClInclude Include="CWebRRIPageGeneralDlg.h" />
+    <ClInclude Include="CWebRRIPageGridDlg.h" />
+    <ClInclude Include="CWebRRIPageLandDlg.h" />
+    <ClInclude Include="CWebRRIPageMapDlg.h" />
+    <ClInclude Include="CWebRRIPageOutputDlg.h" />
     <ClInclude Include="DataColor.h" />
     <ClInclude Include="DataColorSed.h" />
     <ClInclude Include="EditDamCnt.h" />
@@ -256,6 +264,7 @@
     <ClInclude Include="TimeVal.h" />
     <ClInclude Include="TSEDITDLG.h" />
     <ClInclude Include="vectorUtil.h" />
+    <ClInclude Include="WebRRIInputDlg.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AsEdit.cpp" />
@@ -265,6 +274,14 @@
     <ClCompile Include="CInBitStream.cpp" />
     <ClCompile Include="CJpegDecoder.cpp" />
     <ClCompile Include="CSetSedNo.cpp" />
+    <ClCompile Include="CWebRRIPageBoundaryDlg.cpp" />
+    <ClCompile Include="CWebRRIPageCalibrationDlg.cpp" />
+    <ClCompile Include="CWebRRIPageDamDlg.cpp" />
+    <ClCompile Include="CWebRRIPageGeneralDlg.cpp" />
+    <ClCompile Include="CWebRRIPageGridDlg.cpp" />
+    <ClCompile Include="CWebRRIPageLandDlg.cpp" />
+    <ClCompile Include="CWebRRIPageMapDlg.cpp" />
+    <ClCompile Include="CWebRRIPageOutputDlg.cpp" />
     <ClCompile Include="DataColor.cpp" />
     <ClCompile Include="DataColorSed.cpp" />
     <ClCompile Include="EditDamCnt.cpp" />
@@ -300,6 +317,7 @@
     <ClCompile Include="Tab_Param.cpp" />
     <ClCompile Include="TimeVal.cpp" />
     <ClCompile Include="TSEDITDLG.cpp" />
+    <ClCompile Include="WebRRIInputDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RRI_GUI.rc" />

@@ -518,6 +518,9 @@ public:
 	afx_msg void OnBnClickedButtonLanduseJp2();
 	afx_msg void OnStnClickedStatic214();
 	afx_msg void OnBnClickedBtnSetsedim();
+	afx_msg void OnBnClickedButtonWebRri();
+	afx_msg void OnBnClickedRunWebRri();
+	afx_msg void OnBnClickedEditWebRri();
 };
 
 #ifndef _DEBUG  // RRI_GUIView.cpp のデバッグ バージョン

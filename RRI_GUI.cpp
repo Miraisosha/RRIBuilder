@@ -11,6 +11,8 @@
 #include "RRI_GUIDoc.h"
 #include "RRI_GUIView.h"
 
+#include "WebRRIInputDlg.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -68,6 +70,11 @@ BOOL CRRI_GUIApp::InitInstance()
 
 	CWinApp::InitInstance();
 //	afxAmbientActCtx = FALSE; // <<-- Add this line 20141024
+#ifdef _DEBUG
+	CWebRRIInputDlg dlg;
+	dlg.DoModal();
+#endif
+
 
 	// OLE ƒ‰ƒCƒuƒ‰ƒŠ‚ð‰Šú‰»‚µ‚Ü‚·B
 	if (!AfxOleInit())
