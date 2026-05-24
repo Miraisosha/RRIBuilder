@@ -1,0 +1,309 @@
+ &JOBNAME
+      runname = 'Krishna'
+      para_dir = '../INPUTS/parameters/'
+      data_dir ='../INPUTS/DIRECT/'
+      result1_dir = './'
+      result2_dir = './'
+      simulation_dir = './'
+      recv_dir = './recover/'
+
+ /
+
+&MODEL_MODE
+  RRI = .true.    ! Default WEBDHM
+  MIXED = .flase.
+
+/
+
+
+&IN_BOUNDARY
+ IN_BOUND = .false.
+ !IN_BOUND = .true.
+ IN_FILE = 'Koryoume_discharge.txt'   
+ X_GRID = 257
+ Y_GRID = 221  ! 662
+
+/
+
+
+
+ &TIMESTEP
+      initime = '2024-07-01:00:00:00'       !'2004-01-01:00:00:00'
+      tstart  = 0
+      tstop   =  25552000 !8640000 !718400000 
+      dt_couple = 3600
+      dtlsm   = 3600
+      dthydro = 3600
+      recv_mode = 0 !  0 for normal start, 1 for recovering start
+ /
+ &POSITION
+      latsw  = 6.96532701450001
+      latne  = 7.82080026964
+      lonsw  = 125.1825
+      lonne  = 125.72313
+      xsw  = 239757.832456421
+      xne  = 1085712.20489973
+      ysw  = 638653.064835116
+      yne  = 1651206.76664363
+ /
+ &GRID
+      dx      = 1778.8455  !1851.10366
+      dy      = 1844.3561  !924.194 ! 1857.89670
+      dzroot  = 0.2
+      dzdeep  = 0.4
+ /
+ &MAPFILE
+      gridarea_map   = 'cell_area.asc'
+      elevation_map  = 'aadem2.asc'
+      direction_map  = 'aadir2.txt'    ! Addred for RRI
+      accumulation_map  = 'acc2.asc'    ! Addred for RRI
+      width_map  = ''    ! Addred for RRI
+      depth_map  = ''    ! Addred for RRI
+      levee_map  = ''
+      slopelength_map= ''
+      slopeangle_map = ''
+      soildepth_map  = ''
+      acquiferdepth_map = ''
+      zref_map       = ''
+      met_alt_map    = ''
+      land_map       = 'lu.asc'
+      soil_map       = 'soil_unit.asc'
+      soil_code      = 'soil_code.txt'
+      soil_table     = 'soil_water_para.dat'
+      met_map        = ''
+/
+&TOPOGRAPHY
+     ele0     = 1000.0
+     slope0   = 0.05
+     length0  = 300.0
+     Ds0      = 1.0 !0.50 !1.25 !0.5 ! 4.0
+     deldpth  = 4.0 !1.50 ! Dg - Ds  (if set to <=0 value for Dg = 2.0 * Ds)
+     zwind0    = 10.0
+
+ /
+ &INITSOIL
+      sfcdat  = 1
+      vegfromtype = 1
+        styp    = 4
+        vtyp    = 3
+        lai0    = 0.3
+        veg0    = 0.5
+        soilinit = 1
+        tslnd0   =  300.0
+        tscanp0  =  300.0
+        tswtr0   =  300.0
+        tsoil0   =  300.0
+        vlcsfc0  = 0.0
+        vlcrt0   = 0.0
+        vlcdp0   = 0.0
+        wetcanp0 = 0.0
+        wetg0    = 0.0
+        snowc0   = 0.0
+        snowg0   = 0.0
+        tsprt    = 0.0
+        tcprt    = 0.0
+        t2prt    = 0.0
+        wgrat    = 0.950 !0.7
+        wrtrat   = 0.950 !0.7
+        w2rat    = 0.950 !0.7
+ /
+ &LSMMODEL
+        rstopt  = 0
+ /
+&MISC
+         SSTMAX_CALIB = 1.0  !1.
+         KSAT1_CALIB =  1.0 !0.80 !0.50  !2.0
+         KSAT2_CALIB =  1.0 !0.80 !0.250 !10.0  !3.0  ! Ksat2 = KSAT2_CALIB * Ksat1
+         ROUGHNESS_N_CALIB = 0.3 !0.2 !0.3 !0.18 ! 0.5 !0.20 !0.12 !0.5 !0.12 ! 0.5
+         RIVER_ROUGHNESS_OVERRIDE = 0.028 !0.028 !0.035 !0.032 !0.025 !0.03 !0.010 !0.08 !0.10 !0.10 !0.04
+	 ANIK_CALIB = 1.0 !0.10 !5.0
+         GAUGEPOINT_SUBCATCHMENT = 'ws100'
+! RRI Parameter
+         riv_thres_in = 100 !60
+         width_param_c_in = 8.3 !6.4 !6.8 !11.5 !9.0 !8.5 !8.0 !7.5 !6.5 !6.0
+         width_param_s_in = 0.3!0.30 !0.34 !0.34 !0.4 !0.30
+         depth_param_c_in = 0.7 !0.6 !0.8 !0.90 !0.95 !0.65 !0.68 !0.72 !0.8 !0.75 !0.75 !8.0 !0.95 !0.8
+         depth_param_s_in = 0.22 !0.23 !0.20 ! 0.25 
+         height_param_in = 0.0
+         height_limit_param_in = 20.0 
+
+! flowint <= 0 implies furthest downstream flowint
+         GAUGEPOINT_FLOWINT = -1
+
+! Set this to the number of threads you want to use.
+! Alternatively you can set a system variable.
+! No setting usually means use as many threads as there are cores.
+! ( <= 0 here will use the system setting)
+
+        OMP_NUM_THREADS = 12 
+
+/
+&INPUT
+         INICON_CFG = 0
+
+         fixed_inisub = 1
+         fixed_finsub = 9 
+
+         READ_REL_HUM = .false.
+         UPD_PSFC = .false.
+         UPD_TAIR = .false.
+	 READ_SEPARATE_U_V = .true.
+         PREFIXES = 'TA_,LW_,SW_,CC_,U_,SH_,PS_,RH_,V_'
+         PREFIX_RAIN = 'IMD_'
+
+
+         METEO_INPUT_TYPE = 3
+
+! 1 means daily rainfall
+! 2 means per-timestep rainfall
+         RAINFALL_INPUT_TYPE = 2
+
+! .true. means monthly LAI
+! .false. means 8-day LAI
+
+         MONTHLY_LAIFPAR = .false.
+
+!         SNOWPRCP_B(1) = 1.0
+!         SNOWPRCP_B(2) = 2.0
+!         SNOWPRCP_B(3) = 3.0
+!         SNOWPRCP_B(4) = 4.0
+!         SNOWPRCP_B(5) = 5.0
+!         SNOWPRCP_B(6) = 6.0
+!         SNOWPRCP_B(7) = 7.0
+
+/
+&OUTPUT
+         OUT1_CODESTART = 1
+         OUT1_CODEEND = 9
+         OUT1_FLOWINT = -1
+
+!          avg(1)%name='test-aveg.hourly'
+!          avg(1)%startsub='ws900'
+!          avg(1)%endsub='ws100'
+!          avg(1)%endflowint = -1
+
+
+!         discharge(1)%name = 'outlet1'
+!         discharge(1)%subcatch = 'ws100'
+!         discharge(1)%flowint = 7
+
+!         discharge(2)%name = 'outlet2'
+!         discharge(2)%subcatch = 'ws200'
+!         discharge(2)%flowint = -1
+!
+!         discharge(3)%name = 'outlet3'
+!         discharge(3)%subcatch = 'ws300'
+!         discharge(3)%flowint = 14
+!
+!
+!         discharge(4)%name = 'outlet4'
+!         discharge(4)%subcatch = 'ws400'
+!         discharge(4)%flowint = -1
+!
+!         discharge(5)%name = 'outlet5'
+!         discharge(5)%subcatch = 'ws500'
+!         discharge(5)%flowint = -1
+!
+!         discharge(6)%name = 'outlet6'
+!         discharge(6)%subcatch = 'ws600'
+!         discharge(6)%flowint = -1
+!
+!         discharge(7)%name = 'outlet7'
+!         discharge(7)%subcatch = 'ws700'
+!         discharge(7)%flowint = -1
+!
+!         discharge(8)%name = 'outlet8'
+!         discharge(8)%subcatch = 'ws800'
+!         discharge(8)%flowint = -1
+!
+!         discharge(9)%name = 'outlet9'
+!         discharge(9)%subcatch = 'ws900'
+!         discharge(9)%flowint = -1
+!
+! This feature is still in 'beta'
+         discharge(1)%single_year = .true.
+
+! water-balance:
+!wsfc,wrt,wdp,tg,tsoil,snowc,snowg,wetcanp,wetg,roff_i,roff_g,dgl,drw
+! energy-balance: eci,ect,egi,egs
+! forcing:        cld,psfc,radlw,radsw,tair,uv
+!         spatial(1)%var =
+!'wsfc,wrt,wdp,tg,tsoil,wetcanp,wetg,dgl,eci,ect,egi,egs,cld,psfc,radlw,radsw,tair'
+!'wsfc,wrt,wdp,tg,tsoil,snowc,snowg,wetcanp,wetg,roff_i,roff_g,dgl,drw,eci,ect,egi,egs,cld,psfc,radlw,radsw,tair,uv'
+! 't' = per-timestep
+! 'h' = hourly
+! 'd' = daily
+! 'm' = monthly
+!         spatial(1)%group = 'd'
+!         spatial(1)%filter = '0'
+
+
+/
+
+
+
+
+
+!RAsmy 
+&OUTPUT_DIS
+
+
+
+STION(1)%name = 'PT1'
+STION(1)%LOC_I = 453
+STION(1)%LOC_J = 221
+
+
+STION(2)%name = 'PT2'
+STION(2)%LOC_I = 291
+STION(2)%LOC_J = 209
+
+STION(3)%name = 'PT3'
+STION(3)%LOC_I =  292  !164  !161
+STION(3)%LOC_J =  214  !361 !352  !330
+
+
+STION(4)%name = 'PT4'
+STION(4)%LOC_I =  237  !161
+STION(4)%LOC_J =  180 !352  !330
+
+STION(5)%name = 'PT5'
+STION(5)%LOC_I = 236
+STION(5)%LOC_J = 182
+
+
+STION(6)%name = 'ST6'
+STION(6)%LOC_I  = 382
+STION(6)%LOC_J = 164
+
+
+STION(7)%name = 'ST7'
+STION(7)%LOC_I = 379
+STION(7)%LOC_J = 168
+!
+!
+!STION(8)%name = 'Mango'
+!STION(8)%LOC_I = 350
+!STION(8)%LOC_J = 275
+
+/
+
+
+ &debugging
+         POINTSCALE_I = -1 !6
+         POINTSCALE_J = -1 !273
+ /
+
+&snow
+		TH_SNOW = 0.0
+ /
+&bats
+		TH_SNOW = 0.0
+		visalbedo = 0.85
+		niralbedo = 0.65
+ /
+
+&dam_control
+     dam_switch = 0
+     damfile = 'dam_info.txt'
+/

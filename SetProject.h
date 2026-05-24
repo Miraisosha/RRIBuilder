@@ -23,6 +23,7 @@ public:
 	BOOL			Button_Dir(CString* m_ProjName, char* Path);
 //
 	CString		ProjDir;
+	CString		ProjRRIDir;
 	//
 	BOOL		Set_DSET();
 	void		Disp_Radio();

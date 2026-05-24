@@ -9,6 +9,8 @@
 #include "InitProj.h"
 #include "afxdialogex.h"
 
+#include "ProjectUtil.h"
+
 extern  int		CREAT;
 
 // CInitProj ダイアログ
@@ -42,13 +44,13 @@ END_MESSAGE_MAP()
 
 void CInitProj::OnBnClickedButton1()
 {
-	CREAT = 2;
+	CREAT = CREATE_WEB_RRI_LOAD;
 	CDialogEx::OnOK();
 }
 
 
 void CInitProj::OnBnClickedOk()
 {
-	CREAT = 1;
+	CREAT = CREATE_WEB_RRI_NEW;
 	CDialogEx::OnOK();
 }

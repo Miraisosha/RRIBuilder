@@ -122,6 +122,7 @@
       <AdditionalIncludeDirectories>.\Tools\GDAL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <SDLCheck>false</SDLCheck>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -141,6 +142,9 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <PostBuildEvent>
+      <Command>xcopy /E /Y /I "$(ProjectDir)Template" "$(OutDir)Template"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -237,6 +241,7 @@
     <ClInclude Include="EDITDLG.h" />
     <ClInclude Include="EditLocation.h" />
     <ClInclude Include="FDirect.h" />
+    <ClInclude Include="Global.h" />
     <ClInclude Include="Group.h" />
     <ClInclude Include="InitProj.h" />
     <ClInclude Include="JPEG.h" />
@@ -247,6 +252,7 @@
     <ClInclude Include="MultiColor.h" />
     <ClInclude Include="OutputSelectionDlg.h" />
     <ClInclude Include="Period.h" />
+    <ClInclude Include="ProjectUtil.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RI_DLG.h" />
     <ClInclude Include="RRI_Common.h" />
@@ -264,6 +270,7 @@
     <ClInclude Include="TimeVal.h" />
     <ClInclude Include="TSEDITDLG.h" />
     <ClInclude Include="vectorUtil.h" />
+    <ClInclude Include="WebRRIInput.h" />
     <ClInclude Include="WebRRIInputDlg.h" />
   </ItemGroup>
   <ItemGroup>
@@ -289,6 +296,7 @@
     <ClCompile Include="EDITDLG.cpp" />
     <ClCompile Include="EditLocation.cpp" />
     <ClCompile Include="FDirect.cpp" />
+    <ClCompile Include="Global.cpp" />
     <ClCompile Include="Group.cpp" />
     <ClCompile Include="InitProj.cpp" />
     <ClCompile Include="MagDlg.cpp" />
@@ -298,6 +306,7 @@
     <ClCompile Include="MultiColor.cpp" />
     <ClCompile Include="OutputSelectionDlg.cpp" />
     <ClCompile Include="Period.cpp" />
+    <ClCompile Include="ProjectUtil.cpp" />
     <ClCompile Include="RI_DLG.cpp" />
     <ClCompile Include="RRI_Common.cpp" />
     <ClCompile Include="RRI_GUI.cpp" />
@@ -317,6 +326,7 @@
     <ClCompile Include="Tab_Param.cpp" />
     <ClCompile Include="TimeVal.cpp" />
     <ClCompile Include="TSEDITDLG.cpp" />
+    <ClCompile Include="WebRRIInput.cpp" />
     <ClCompile Include="WebRRIInputDlg.cpp" />
   </ItemGroup>
   <ItemGroup>

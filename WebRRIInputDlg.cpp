@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "RRI_GUI.h"
 #include "WebRRIInputDlg.h"
+#include "Global.h"
+#include "WebRRIInput.h"
 
 #include "CWebRRIPageGeneralDlg.h"
 #include "CWebRRIPageGridDlg.h"
@@ -34,16 +36,25 @@ BEGIN_MESSAGE_MAP(CWebRRIInputDlg, CDialogEx)
     ON_MESSAGE(WM_WEBRRI_EVENT,
         &CWebRRIInputDlg::OnWebRRIEvent)
 
+    ON_BN_CLICKED(BTN_OK, &CWebRRIInputDlg::OnBnClickedOk)
+    ON_BN_CLICKED(BTN_CANCEL, &CWebRRIInputDlg::OnBnClickedCancel)
+    ON_BN_CLICKED(BTN_SAVE, &CWebRRIInputDlg::OnBnClickedSave)
+    ON_BN_CLICKED(BTN_SAVE_AS, &CWebRRIInputDlg::OnBnClickedSaveAs)
 END_MESSAGE_MAP()
 
 BOOL CWebRRIInputDlg::OnInitDialog()
 {
     CDialogEx::OnInitDialog();
 
-    // attach tab
+    // ------------------------------------------------------
+    // WEB_RRI_INPUT
+	CWebRRIInputDlg dlg;
+    dlg.m_input = g_WebRRIInput;
+
+    // ------------------------------------------------------
+    // TAB
     m_tab.SubclassDlgItem(IDC_TAB_MAIN, this);
 
-    // tab add
     m_tab.InsertItem(0, _T("General"));
     m_tab.InsertItem(1, _T("Grid"));
     m_tab.InsertItem(2, _T("Map"));
@@ -53,13 +64,9 @@ BOOL CWebRRIInputDlg::OnInitDialog()
     m_tab.InsertItem(6, _T("Calibration"));
     m_tab.InsertItem(7, _T("Dam"));
 
-    // get area
     CRect rc;
     m_tab.GetClientRect(&rc);
-
     rc.top += 15;
-
-    // create pages
     m_pageGeneral.Create(IDD_WEBRRI_PAGE_GENERAL, &m_tab);
     m_pageGrid.Create(IDD_WEBRRI_PAGE_GRID, &m_tab);
     m_pageMap.Create(IDD_WEBRRI_PAGE_MAP, &m_tab);
@@ -69,7 +76,6 @@ BOOL CWebRRIInputDlg::OnInitDialog()
     m_pageCalibration.Create(IDD_WEBRRI_PAGE_CALIBRATION, &m_tab);
     m_pageDam.Create(IDD_WEBRRI_PAGE_DAM, &m_tab);
 
-    // resize
     rc.DeflateRect(5, 5);
     m_pageGeneral.MoveWindow(&rc);
     m_pageGrid.MoveWindow(&rc);
@@ -80,9 +86,7 @@ BOOL CWebRRIInputDlg::OnInitDialog()
     m_pageCalibration.MoveWindow(&rc);
     m_pageDam.MoveWindow(&rc);
 
-    // first page
     m_pageGeneral.ShowWindow(SW_SHOW);
-
     m_pageGrid.ShowWindow(SW_HIDE);
     m_pageMap.ShowWindow(SW_HIDE);
     m_pageBoundary.ShowWindow(SW_HIDE);
@@ -90,6 +94,11 @@ BOOL CWebRRIInputDlg::OnInitDialog()
     m_pageLand.ShowWindow(SW_HIDE);
     m_pageCalibration.ShowWindow(SW_HIDE);
     m_pageDam.ShowWindow(SW_HIDE);
+
+
+    // ------------------------------------------------------
+    // ‰æ–Ê•\Ž¦
+    LoadInputToScreen();
 
     return TRUE;
 }
@@ -201,4 +210,875 @@ LRESULT CWebRRIInputDlg::OnWebRRIEvent(
     }
 
     return 0;
+}
+
+
+void CWebRRIInputDlg::OnBnClickedOk()
+{
+    SaveScreenToInput();
+	CDialogEx::OnOK();
+}
+
+
+void CWebRRIInputDlg::OnBnClickedCancel()
+{
+    CDialogEx::OnCancel();
+}
+
+
+void CWebRRIInputDlg::OnBnClickedSave()
+{
+    SaveScreenToInput();
+
+    // ‚Ü‚¾•Û‘¶æ‚ª‚È‚¢
+    if (m_inputPath.IsEmpty())
+    {
+        OnBnClickedSaveAs();
+        return;
+    }
+
+    if (!SaveWebRRIInput(
+        m_inputPath,
+        m_input))
+    {
+        AfxMessageBox(_T("Save failed"));
+        return;
+    }
+
+    AfxMessageBox(_T("Saved"));
+}
+
+
+void CWebRRIInputDlg::OnBnClickedSaveAs()
+{
+    SaveScreenToInput();
+    CFileDialog dlg(
+        FALSE,
+        _T("txt"),
+        _T("input.txt"),
+        OFN_OVERWRITEPROMPT,
+        _T("Text Files (*.txt)|*.txt||"));
+
+    if (dlg.DoModal() != IDOK)
+    {
+        return;
+    }
+
+    m_inputPath = dlg.GetPathName();
+
+    if (!SaveWebRRIInput(
+        m_inputPath,
+        m_input))
+    {
+        AfxMessageBox(_T("Save failed"));
+        return;
+    }
+
+    AfxMessageBox(_T("Saved"));
+}
+
+void CWebRRIInputDlg::LoadInputToScreen()
+{
+	// =====================================================
+	// General - JOBNAME
+
+	m_pageGeneral.SetDlgItemText(
+		IDC_EDIT_RUNNAME,
+		m_input.JOBNAME.runname);
+
+	m_pageGeneral.SetDlgItemText(
+		IDC_EDIT_PARA_DIR,
+		m_input.JOBNAME.para_dir);
+
+	m_pageGeneral.SetDlgItemText(
+		IDC_EDIT_DATA_DIR,
+		m_input.JOBNAME.data_dir);
+
+	m_pageGeneral.SetDlgItemText(
+		IDC_EDIT_RESULT1_DIR,
+		m_input.JOBNAME.result1_dir);
+
+	m_pageGeneral.SetDlgItemText(
+		IDC_EDIT_RESULT2_DIR,
+		m_input.JOBNAME.result2_dir);
+
+	m_pageGeneral.SetDlgItemText(
+		IDC_EDIT_SIMULATION_DIR,
+		m_input.JOBNAME.simulation_dir);
+
+	m_pageGeneral.SetDlgItemText(
+		IDC_EDIT_RECV_DIR,
+		m_input.JOBNAME.recv_dir);
+
+	// =====================================================
+	// General - MODEL_MODE
+
+	((CButton*)m_pageGeneral.GetDlgItem(IDC_CHK_RRI))
+		->SetCheck(m_input.MODEL_MODE.RRI);
+
+	((CButton*)m_pageGeneral.GetDlgItem(IDC_CHK_MIXED))
+		->SetCheck(m_input.MODEL_MODE.MIXED);
+
+	// =====================================================
+	// General - TIMESTEP
+
+	SYSTEMTIME st = { 0 };
+
+	_stscanf_s(
+		m_input.TIMESTEP.initime,
+		_T("%hu/%hu/%hu %hu:%hu"),
+		&st.wYear,
+		&st.wMonth,
+		&st.wDay,
+		&st.wHour,
+		&st.wMinute);
+
+	CWnd* p1 =
+		m_pageGeneral.GetDlgItem(IDC_DPIC_INITIME);
+
+	CWnd* p2 =
+		m_pageGeneral.GetDlgItem(IDC_TPIC_INITIME);
+
+	if (p1 == NULL)
+	{
+		AfxMessageBox(_T("DPIC NULL"));
+	}
+
+	if (p2 == NULL)
+	{
+		AfxMessageBox(_T("TPIC NULL"));
+	}
+	//	((CDateTimeCtrl*)m_pageGeneral.GetDlgItem(IDC_DPIC_INITIME))
+	//		->SetTime(&st);
+	//
+	//	((CDateTimeCtrl*)m_pageGeneral.GetDlgItem(IDC_TPIC_INITIME))
+	//		->SetTime(&st);
+
+	CString str;
+
+	str.Format(_T("%d"), m_input.TIMESTEP.tstart);
+	m_pageGeneral.SetDlgItemText(
+		IDC_EDIT_TSTART,
+		str);
+
+	str.Format(_T("%d"), m_input.TIMESTEP.tstop);
+	m_pageGeneral.SetDlgItemText(
+		IDC_EDIT_TSTOP,
+		str);
+
+	str.Format(_T("%d"), m_input.TIMESTEP.dt_couple);
+	m_pageGeneral.SetDlgItemText(
+		IDC_EDIT_DT_COUPLE,
+		str);
+
+	str.Format(_T("%d"), m_input.TIMESTEP.dtlsm);
+	m_pageGeneral.SetDlgItemText(
+		IDC_EDIT_DTLSM,
+		str);
+
+	str.Format(_T("%d"), m_input.TIMESTEP.dthydro);
+	m_pageGeneral.SetDlgItemText(
+		IDC_EDIT_DTHYDRO,
+		str);
+
+	((CComboBox*)m_pageGeneral.GetDlgItem(IDC_CMB_RECV_MODE))
+		->SetCurSel(m_input.TIMESTEP.recv_mode);
+
+	// =====================================================
+	// Grid - POSITION
+
+	str.Format(_T("%.6f"), m_input.POSITION.latsw);
+	m_pageGrid.SetDlgItemText(IDC_EDIT_LATSW, str);
+
+	str.Format(_T("%.6f"), m_input.POSITION.latne);
+	m_pageGrid.SetDlgItemText(IDC_EDIT_LATNE, str);
+
+	str.Format(_T("%.6f"), m_input.POSITION.lonsw);
+	m_pageGrid.SetDlgItemText(IDC_EDIT_LONSW, str);
+
+	str.Format(_T("%.6f"), m_input.POSITION.lonne);
+	m_pageGrid.SetDlgItemText(IDC_EDIT_LONNE, str);
+
+	str.Format(_T("%.6f"), m_input.POSITION.xsw);
+	m_pageGrid.SetDlgItemText(IDC_EDIT_XSW, str);
+
+	str.Format(_T("%.6f"), m_input.POSITION.xne);
+	m_pageGrid.SetDlgItemText(IDC_EDIT_XNE, str);
+
+	str.Format(_T("%.6f"), m_input.POSITION.ysw);
+	m_pageGrid.SetDlgItemText(IDC_EDIT_YSW, str);
+
+	str.Format(_T("%.6f"), m_input.POSITION.yne);
+	m_pageGrid.SetDlgItemText(IDC_EDIT_YNE, str);
+
+	// =====================================================
+	// Grid - GRID
+
+	str.Format(_T("%.6f"), m_input.GRID.dx);
+	m_pageGrid.SetDlgItemText(IDC_EDIT_DX, str);
+
+	str.Format(_T("%.6f"), m_input.GRID.dy);
+	m_pageGrid.SetDlgItemText(IDC_EDIT_DY, str);
+
+	str.Format(_T("%.6f"), m_input.GRID.dzroot);
+	m_pageGrid.SetDlgItemText(IDC_EDIT_DZROOT, str);
+
+	str.Format(_T("%.6f"), m_input.GRID.dzdeep);
+	m_pageGrid.SetDlgItemText(IDC_EDIT_DZDEEP, str);
+
+	// =====================================================
+	// Map - MAPFILE
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_GRIDAREA_MAP,
+		m_input.MAPFILE.gridarea_map);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_ELEVATION_MAP,
+		m_input.MAPFILE.elevation_map);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_DIRECTION_MAP,
+		m_input.MAPFILE.direction_map);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_ACCUMULATION_MAP,
+		m_input.MAPFILE.accumulation_map);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_WIDTH_MAP,
+		m_input.MAPFILE.width_map);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_DEPTH_MAP,
+		m_input.MAPFILE.depth_map);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_LEVEE_MAP,
+		m_input.MAPFILE.levee_map);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_SLOPELENGTH_MAP,
+		m_input.MAPFILE.slopelength_map);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_SLOPEANGLE_MAP,
+		m_input.MAPFILE.slopeangle_map);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_SOILDEPTH_MAP,
+		m_input.MAPFILE.soildepth_map);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_ACQUIFERDEPTH_MAP,
+		m_input.MAPFILE.acquiferdepth_map);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_ZREF_MAP,
+		m_input.MAPFILE.zref_map);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_MET_ALT_MAP,
+		m_input.MAPFILE.met_alt_map);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_LAND_MAP,
+		m_input.MAPFILE.land_map);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_SOIL_MAP,
+		m_input.MAPFILE.soil_map);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_SOIL_CODE,
+		m_input.MAPFILE.soil_code);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_SOIL_TABLE,
+		m_input.MAPFILE.soil_table);
+
+	m_pageMap.SetDlgItemText(
+		IDC_EDIT_MET_MAP,
+		m_input.MAPFILE.met_map);
+
+	// =====================================================
+	// Map - TOPOGRAPHY
+
+	str.Format(_T("%.6f"), m_input.TOPOGRAPHY.ele0);
+	m_pageMap.SetDlgItemText(IDC_EDIT_ELE0, str);
+
+	str.Format(_T("%.6f"), m_input.TOPOGRAPHY.slope0);
+	m_pageMap.SetDlgItemText(IDC_EDIT_SLOPE0, str);
+
+	str.Format(_T("%.6f"), m_input.TOPOGRAPHY.length0);
+	m_pageMap.SetDlgItemText(IDC_EDIT_LENGTH0, str);
+
+	str.Format(_T("%.6f"), m_input.TOPOGRAPHY.Ds0);
+	m_pageMap.SetDlgItemText(IDC_EDIT_DS0, str);
+
+	str.Format(_T("%.6f"), m_input.TOPOGRAPHY.deldpth);
+	m_pageMap.SetDlgItemText(IDC_EDIT_DELDPTH, str);
+
+	str.Format(_T("%.6f"), m_input.TOPOGRAPHY.zwind0);
+	m_pageMap.SetDlgItemText(IDC_EDIT_ZWIND0, str);
+
+	// =====================================================
+	// Boundary
+
+	((CButton*)m_pageBoundary.GetDlgItem(IDC_CHK_IN_BOUND))
+		->SetCheck(m_input.IN_BOUNDARY.IN_BOUND);
+
+	m_pageBoundary.SetDlgItemText(
+		IDC_EDIT_IN_FILE,
+		m_input.IN_BOUNDARY.IN_FILE);
+
+	str.Format(_T("%d"), m_input.IN_BOUNDARY.X_GRID);
+	m_pageBoundary.SetDlgItemText(IDC_EDIT_X_GRID, str);
+
+	str.Format(_T("%d"), m_input.IN_BOUNDARY.Y_GRID);
+	m_pageBoundary.SetDlgItemText(IDC_EDIT_Y_GRID, str);
+
+	// =====================================================
+	// Output
+
+	str.Format(_T("%d"), m_input.OUTPUT.OUT1_CODESTART);
+	m_pageOutput.SetDlgItemText(IDC_EDIT_OUT1_CODESTART, str);
+
+	str.Format(_T("%d"), m_input.OUTPUT.OUT1_CODEEND);
+	m_pageOutput.SetDlgItemText(IDC_EDIT_OUT1_CODEEND, str);
+
+	str.Format(_T("%d"), m_input.OUTPUT.OUT1_FLOWINT);
+	m_pageOutput.SetDlgItemText(IDC_EDIT_OUT1_FLOWINT, str);
+
+	// =====================================================
+	// Land - INITSOIL
+
+	str.Format(_T("%d"), m_input.INITSOIL.sfcdat);
+	m_pageLand.SetDlgItemText(IDC_EDIT_SFCDAT, str);
+
+	str.Format(_T("%d"), m_input.INITSOIL.vegfromtype);
+	m_pageLand.SetDlgItemText(IDC_EDIT_VEGFROMTYPE, str);
+
+	str.Format(_T("%d"), m_input.INITSOIL.styp);
+	m_pageLand.SetDlgItemText(IDC_EDIT_STYP, str);
+
+	str.Format(_T("%d"), m_input.INITSOIL.vtyp);
+	m_pageLand.SetDlgItemText(IDC_EDIT_VTYP, str);
+
+	str.Format(_T("%.6f"), m_input.INITSOIL.lai0);
+	m_pageLand.SetDlgItemText(IDC_EDIT_LAI0, str);
+
+	str.Format(_T("%.6f"), m_input.INITSOIL.veg0);
+	m_pageLand.SetDlgItemText(IDC_EDIT_VEG0, str);
+
+	str.Format(_T("%d"), m_input.INITSOIL.soilinit);
+	m_pageLand.SetDlgItemText(IDC_EDIT_SOILINIT, str);
+
+	str.Format(_T("%.6f"), m_input.INITSOIL.tslnd0);
+	m_pageLand.SetDlgItemText(IDC_EDIT_TSLND0, str);
+
+	str.Format(_T("%.6f"), m_input.INITSOIL.tscanp0);
+	m_pageLand.SetDlgItemText(IDC_EDIT_TSCANP0, str);
+
+	str.Format(_T("%.6f"), m_input.INITSOIL.tswtr0);
+	m_pageLand.SetDlgItemText(IDC_EDIT_TSWTR0, str);
+
+	str.Format(_T("%.6f"), m_input.INITSOIL.tsoil0);
+	m_pageLand.SetDlgItemText(IDC_EDIT_TSOIL0, str);
+
+	// =====================================================
+	// Land - LSMMODEL
+
+	str.Format(_T("%d"), m_input.LSMMODEL.rstopt);
+	m_pageLand.SetDlgItemText(IDC_EDIT_RSTOPT, str);
+
+	// =====================================================
+	// Calibration - MISC
+
+	str.Format(_T("%.6f"), m_input.MISC.SSTMAX_CALIB);
+	m_pageCalibration.SetDlgItemText(IDC_EDIT_SSTMAX_CALIB, str);
+
+	str.Format(_T("%.6f"), m_input.MISC.KSAT1_CALIB);
+	m_pageCalibration.SetDlgItemText(IDC_EDIT_KSAT1_CALIB, str);
+
+	str.Format(_T("%.6f"), m_input.MISC.KSAT2_CALIB);
+	m_pageCalibration.SetDlgItemText(IDC_EDIT_KSAT2_CALIB, str);
+
+	// =====================================================
+	// Calibration - INPUT
+
+	((CButton*)m_pageCalibration.GetDlgItem(IDC_CHK_READ_REL_HUM))
+		->SetCheck(m_input.INPUT.READ_REL_HUM);
+
+	((CButton*)m_pageCalibration.GetDlgItem(IDC_CHK_UPD_PSFC))
+		->SetCheck(m_input.INPUT.UPD_PSFC);
+
+	((CButton*)m_pageCalibration.GetDlgItem(IDC_CHK_UPD_TAIR))
+		->SetCheck(m_input.INPUT.UPD_TAIR);
+
+	((CButton*)m_pageCalibration.GetDlgItem(IDC_CHK_READ_SEPARATE_U_V))
+		->SetCheck(m_input.INPUT.READ_SEPARATE_U_V);
+
+	m_pageCalibration.SetDlgItemText(
+		IDC_EDIT_PREFIXES,
+		m_input.INPUT.PREFIXES);
+
+	m_pageCalibration.SetDlgItemText(
+		IDC_EDIT_PREFIX_RAIN,
+		m_input.INPUT.PREFIX_RAIN);
+
+	((CComboBox*)m_pageCalibration.GetDlgItem(IDC_CMB_METEO_INPUT_TYPE))
+		->SetCurSel(m_input.INPUT.METEO_INPUT_TYPE);
+
+	((CComboBox*)m_pageCalibration.GetDlgItem(IDC_CMB_RAINFALL_INPUT_TYPE))
+		->SetCurSel(m_input.INPUT.RAINFALL_INPUT_TYPE);
+
+	((CButton*)m_pageCalibration.GetDlgItem(IDC_CHK_MONTHLY_LAIFPAR))
+		->SetCheck(m_input.INPUT.MONTHLY_LAIFPAR);
+
+	// =====================================================
+	// Dam
+
+	((CComboBox*)m_pageDam.GetDlgItem(IDC_CMB_DAM_SWITCH))
+		->SetCurSel(m_input.DAM_CONTROL.dam_switch);
+
+	m_pageDam.SetDlgItemText(
+		IDC_EDIT_DAMFILE,
+		m_input.DAM_CONTROL.damfile);
+}
+
+
+void CWebRRIInputDlg::SaveScreenToInput()
+{
+    CString str;
+
+    // =====================================================
+    // General - JOBNAME
+
+    m_pageGeneral.GetDlgItemText(
+        IDC_EDIT_RUNNAME,
+        m_input.JOBNAME.runname);
+
+    m_pageGeneral.GetDlgItemText(
+        IDC_EDIT_PARA_DIR,
+        m_input.JOBNAME.para_dir);
+
+    m_pageGeneral.GetDlgItemText(
+        IDC_EDIT_DATA_DIR,
+        m_input.JOBNAME.data_dir);
+
+    m_pageGeneral.GetDlgItemText(
+        IDC_EDIT_RESULT1_DIR,
+        m_input.JOBNAME.result1_dir);
+
+    m_pageGeneral.GetDlgItemText(
+        IDC_EDIT_RESULT2_DIR,
+        m_input.JOBNAME.result2_dir);
+
+    m_pageGeneral.GetDlgItemText(
+        IDC_EDIT_SIMULATION_DIR,
+        m_input.JOBNAME.simulation_dir);
+
+    m_pageGeneral.GetDlgItemText(
+        IDC_EDIT_RECV_DIR,
+        m_input.JOBNAME.recv_dir);
+
+    // =====================================================
+    // General - MODEL_MODE
+
+    m_input.MODEL_MODE.RRI =
+        ((CButton*)m_pageGeneral.GetDlgItem(IDC_CHK_RRI))
+        ->GetCheck();
+
+    m_input.MODEL_MODE.MIXED =
+        ((CButton*)m_pageGeneral.GetDlgItem(IDC_CHK_MIXED))
+        ->GetCheck();
+
+    // =====================================================
+    // General - TIMESTEP
+
+    CDateTimeCtrl* pDate =
+        (CDateTimeCtrl*)m_pageGeneral.GetDlgItem(IDC_DPIC_INITIME);
+
+    CDateTimeCtrl* pTime =
+        (CDateTimeCtrl*)m_pageGeneral.GetDlgItem(IDC_TPIC_INITIME);
+
+    if (pDate && pTime)
+    {
+        SYSTEMTIME stDate = { 0 };
+        SYSTEMTIME stTime = { 0 };
+
+        pDate->GetTime(&stDate);
+        pTime->GetTime(&stTime);
+
+        str.Format(
+            _T("%04d/%02d/%02d %02d:%02d"),
+            stDate.wYear,
+            stDate.wMonth,
+            stDate.wDay,
+            stTime.wHour,
+            stTime.wMinute);
+
+        m_input.TIMESTEP.initime = str;
+    }
+
+    m_pageGeneral.GetDlgItemText(
+        IDC_EDIT_TSTART,
+        str);
+    m_input.TIMESTEP.tstart = _ttoi(str);
+
+    m_pageGeneral.GetDlgItemText(
+        IDC_EDIT_TSTOP,
+        str);
+    m_input.TIMESTEP.tstop = _ttoi(str);
+
+    m_pageGeneral.GetDlgItemText(
+        IDC_EDIT_DT_COUPLE,
+        str);
+    m_input.TIMESTEP.dt_couple = _ttoi(str);
+
+    m_pageGeneral.GetDlgItemText(
+        IDC_EDIT_DTLSM,
+        str);
+    m_input.TIMESTEP.dtlsm = _ttoi(str);
+
+    m_pageGeneral.GetDlgItemText(
+        IDC_EDIT_DTHYDRO,
+        str);
+    m_input.TIMESTEP.dthydro = _ttoi(str);
+
+    m_input.TIMESTEP.recv_mode =
+        ((CComboBox*)m_pageGeneral.GetDlgItem(IDC_CMB_RECV_MODE))
+        ->GetCurSel();
+
+    // =====================================================
+    // Grid - POSITION
+
+    m_pageGrid.GetDlgItemText(IDC_EDIT_LATSW, str);
+    m_input.POSITION.latsw = _ttof(str);
+
+    m_pageGrid.GetDlgItemText(IDC_EDIT_LATNE, str);
+    m_input.POSITION.latne = _ttof(str);
+
+    m_pageGrid.GetDlgItemText(IDC_EDIT_LONSW, str);
+    m_input.POSITION.lonsw = _ttof(str);
+
+    m_pageGrid.GetDlgItemText(IDC_EDIT_LONNE, str);
+    m_input.POSITION.lonne = _ttof(str);
+
+    m_pageGrid.GetDlgItemText(IDC_EDIT_XSW, str);
+    m_input.POSITION.xsw = _ttof(str);
+
+    m_pageGrid.GetDlgItemText(IDC_EDIT_XNE, str);
+    m_input.POSITION.xne = _ttof(str);
+
+    m_pageGrid.GetDlgItemText(IDC_EDIT_YSW, str);
+    m_input.POSITION.ysw = _ttof(str);
+
+    m_pageGrid.GetDlgItemText(IDC_EDIT_YNE, str);
+    m_input.POSITION.yne = _ttof(str);
+
+    // =====================================================
+    // Grid - GRID
+
+    m_pageGrid.GetDlgItemText(IDC_EDIT_DX, str);
+    m_input.GRID.dx = _ttof(str);
+
+    m_pageGrid.GetDlgItemText(IDC_EDIT_DY, str);
+    m_input.GRID.dy = _ttof(str);
+
+    m_pageGrid.GetDlgItemText(IDC_EDIT_DZROOT, str);
+    m_input.GRID.dzroot = _ttof(str);
+
+    m_pageGrid.GetDlgItemText(IDC_EDIT_DZDEEP, str);
+    m_input.GRID.dzdeep = _ttof(str);
+
+    // =====================================================
+    // Map - MAPFILE
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_GRIDAREA_MAP,
+        m_input.MAPFILE.gridarea_map);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_ELEVATION_MAP,
+        m_input.MAPFILE.elevation_map);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_DIRECTION_MAP,
+        m_input.MAPFILE.direction_map);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_ACCUMULATION_MAP,
+        m_input.MAPFILE.accumulation_map);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_WIDTH_MAP,
+        m_input.MAPFILE.width_map);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_DEPTH_MAP,
+        m_input.MAPFILE.depth_map);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_LEVEE_MAP,
+        m_input.MAPFILE.levee_map);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_SLOPELENGTH_MAP,
+        m_input.MAPFILE.slopelength_map);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_SLOPEANGLE_MAP,
+        m_input.MAPFILE.slopeangle_map);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_SOILDEPTH_MAP,
+        m_input.MAPFILE.soildepth_map);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_ACQUIFERDEPTH_MAP,
+        m_input.MAPFILE.acquiferdepth_map);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_ZREF_MAP,
+        m_input.MAPFILE.zref_map);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_MET_ALT_MAP,
+        m_input.MAPFILE.met_alt_map);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_LAND_MAP,
+        m_input.MAPFILE.land_map);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_SOIL_MAP,
+        m_input.MAPFILE.soil_map);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_SOIL_CODE,
+        m_input.MAPFILE.soil_code);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_SOIL_TABLE,
+        m_input.MAPFILE.soil_table);
+
+    m_pageMap.GetDlgItemText(
+        IDC_EDIT_MET_MAP,
+        m_input.MAPFILE.met_map);
+
+    // =====================================================
+    // Map - TOPOGRAPHY
+
+    m_pageMap.GetDlgItemText(IDC_EDIT_ELE0, str);
+    m_input.TOPOGRAPHY.ele0 = _ttof(str);
+
+    m_pageMap.GetDlgItemText(IDC_EDIT_SLOPE0, str);
+    m_input.TOPOGRAPHY.slope0 = _ttof(str);
+
+    m_pageMap.GetDlgItemText(IDC_EDIT_LENGTH0, str);
+    m_input.TOPOGRAPHY.length0 = _ttof(str);
+
+    m_pageMap.GetDlgItemText(IDC_EDIT_DS0, str);
+    m_input.TOPOGRAPHY.Ds0 = _ttof(str);
+
+    m_pageMap.GetDlgItemText(IDC_EDIT_DELDPTH, str);
+    m_input.TOPOGRAPHY.deldpth = _ttof(str);
+
+    m_pageMap.GetDlgItemText(IDC_EDIT_ZWIND0, str);
+    m_input.TOPOGRAPHY.zwind0 = _ttof(str);
+
+    // =====================================================
+    // Boundary
+
+    m_input.IN_BOUNDARY.IN_BOUND =
+        ((CButton*)m_pageBoundary.GetDlgItem(IDC_CHK_IN_BOUND))
+        ->GetCheck();
+
+    m_pageBoundary.GetDlgItemText(
+        IDC_EDIT_IN_FILE,
+        m_input.IN_BOUNDARY.IN_FILE);
+
+    m_pageBoundary.GetDlgItemText(IDC_EDIT_X_GRID, str);
+    m_input.IN_BOUNDARY.X_GRID = _ttoi(str);
+
+    m_pageBoundary.GetDlgItemText(IDC_EDIT_Y_GRID, str);
+    m_input.IN_BOUNDARY.Y_GRID = _ttoi(str);
+
+    // =====================================================
+    // Output
+
+    m_pageOutput.GetDlgItemText(IDC_EDIT_OUT1_CODESTART, str);
+    m_input.OUTPUT.OUT1_CODESTART = _ttoi(str);
+
+    m_pageOutput.GetDlgItemText(IDC_EDIT_OUT1_CODEEND, str);
+    m_input.OUTPUT.OUT1_CODEEND = _ttoi(str);
+
+    m_pageOutput.GetDlgItemText(IDC_EDIT_OUT1_FLOWINT, str);
+    m_input.OUTPUT.OUT1_FLOWINT = _ttoi(str);
+
+    // =====================================================
+    // Land - INITSOIL
+
+    m_pageLand.GetDlgItemText(IDC_EDIT_SFCDAT, str);
+    m_input.INITSOIL.sfcdat = _ttoi(str);
+
+    m_pageLand.GetDlgItemText(IDC_EDIT_VEGFROMTYPE, str);
+    m_input.INITSOIL.vegfromtype = _ttoi(str);
+
+    m_pageLand.GetDlgItemText(IDC_EDIT_STYP, str);
+    m_input.INITSOIL.styp = _ttoi(str);
+
+    m_pageLand.GetDlgItemText(IDC_EDIT_VTYP, str);
+    m_input.INITSOIL.vtyp = _ttoi(str);
+
+    m_pageLand.GetDlgItemText(IDC_EDIT_LAI0, str);
+    m_input.INITSOIL.lai0 = _ttof(str);
+
+    m_pageLand.GetDlgItemText(IDC_EDIT_VEG0, str);
+    m_input.INITSOIL.veg0 = _ttof(str);
+
+    m_pageLand.GetDlgItemText(IDC_EDIT_SOILINIT, str);
+    m_input.INITSOIL.soilinit = _ttoi(str);
+
+    m_pageLand.GetDlgItemText(IDC_EDIT_TSLND0, str);
+    m_input.INITSOIL.tslnd0 = _ttof(str);
+
+    m_pageLand.GetDlgItemText(IDC_EDIT_TSCANP0, str);
+    m_input.INITSOIL.tscanp0 = _ttof(str);
+
+    m_pageLand.GetDlgItemText(IDC_EDIT_TSWTR0, str);
+    m_input.INITSOIL.tswtr0 = _ttof(str);
+
+    m_pageLand.GetDlgItemText(IDC_EDIT_TSOIL0, str);
+    m_input.INITSOIL.tsoil0 = _ttof(str);
+
+    // =====================================================
+    // Land - LSMMODEL
+
+    m_pageLand.GetDlgItemText(IDC_EDIT_RSTOPT, str);
+    m_input.LSMMODEL.rstopt = _ttoi(str);
+
+    // =====================================================
+    // Dam
+
+    m_input.DAM_CONTROL.dam_switch =
+        ((CComboBox*)m_pageDam.GetDlgItem(IDC_CMB_DAM_SWITCH))
+        ->GetCurSel();
+
+    m_pageDam.GetDlgItemText(
+        IDC_EDIT_DAMFILE,
+        m_input.DAM_CONTROL.damfile);
+}
+
+BOOL SaveWebRRIInput(
+    const CString& path,
+    const WEB_RRI_INPUT& input)
+{
+    CStdioFile file;
+
+    if (!file.Open(
+        path,
+        CFile::modeCreate |
+        CFile::modeWrite |
+        CFile::typeText))
+    {
+        return FALSE;
+    }
+
+    CString line;
+
+    // =====================================================
+    // JOBNAME
+
+    line.Format(
+        _T("RUNNAME = %s\n"),
+        input.JOBNAME.runname);
+    file.WriteString(line);
+
+    line.Format(
+        _T("PARA_DIR = %s\n"),
+        input.JOBNAME.para_dir);
+    file.WriteString(line);
+
+    line.Format(
+        _T("DATA_DIR = %s\n"),
+        input.JOBNAME.data_dir);
+    file.WriteString(line);
+
+    line.Format(
+        _T("RESULT1_DIR = %s\n"),
+        input.JOBNAME.result1_dir);
+    file.WriteString(line);
+
+    line.Format(
+        _T("RESULT2_DIR = %s\n"),
+        input.JOBNAME.result2_dir);
+    file.WriteString(line);
+
+    line.Format(
+        _T("SIMULATION_DIR = %s\n"),
+        input.JOBNAME.simulation_dir);
+    file.WriteString(line);
+
+    line.Format(
+        _T("RECV_DIR = %s\n"),
+        input.JOBNAME.recv_dir);
+    file.WriteString(line);
+
+    // =====================================================
+    // MODEL_MODE
+
+    line.Format(
+        _T("RRI = %d\n"),
+        input.MODEL_MODE.RRI);
+    file.WriteString(line);
+
+    line.Format(
+        _T("MIXED = %d\n"),
+        input.MODEL_MODE.MIXED);
+    file.WriteString(line);
+
+    // =====================================================
+    // TIMESTEP
+
+    line.Format(
+        _T("INITIME = %s\n"),
+        input.TIMESTEP.initime);
+    file.WriteString(line);
+
+    line.Format(
+        _T("TSTART = %d\n"),
+        input.TIMESTEP.tstart);
+    file.WriteString(line);
+
+    line.Format(
+        _T("TSTOP = %d\n"),
+        input.TIMESTEP.tstop);
+    file.WriteString(line);
+
+    line.Format(
+        _T("DT_COUPLE = %d\n"),
+        input.TIMESTEP.dt_couple);
+    file.WriteString(line);
+
+    line.Format(
+        _T("DTLSM = %d\n"),
+        input.TIMESTEP.dtlsm);
+    file.WriteString(line);
+
+    line.Format(
+        _T("DTHYDRO = %d\n"),
+        input.TIMESTEP.dthydro);
+    file.WriteString(line);
+
+    line.Format(
+        _T("RECV_MODE = %d\n"),
+        input.TIMESTEP.recv_mode);
+    file.WriteString(line);
+
+    file.Close();
+
+    return TRUE;
 }

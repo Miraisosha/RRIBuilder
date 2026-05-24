@@ -10,6 +10,7 @@
 #include "CWebRRIPageLandDlg.h"
 #include "CWebRRIPageCalibrationDlg.h"
 #include "CWebRRIPageDamDlg.h"
+#include "WebRRIInput.h"
 
 #define WM_WEBRRI_EVENT   (WM_USER + 100)
 #define WEBRRI_EVT_SELECT_FOLDER   100
@@ -56,7 +57,31 @@ private:
 	// helper
 	CString GetValue(CString key);
 public:
+
+	CString m_inputPath;
+	CString m_projFolder;
+
 	afx_msg void OnTcnSelchangeTabMain(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg LRESULT OnWebRRIEvent(WPARAM wParam, LPARAM lParam);
+
+	WEB_RRI_INPUT m_input;
+
+	afx_msg void OnBnClickedOk();
+	afx_msg void OnBnClickedCancel();
+	afx_msg void OnBnClickedSave();
+	afx_msg void OnBnClickedSaveAs();
+
+	void LoadInputToScreen();
+	void SaveScreenToInput();
+
+//	BOOL LoadWebRRIInput(
+//		const CString& path,
+//		WEB_RRI_INPUT& input
+//	);
+
+//	BOOL SaveWebRRIInput(
+//		const CString& path,
+//		const WEB_RRI_INPUT& input
+//	);
 };

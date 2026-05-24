@@ -1,0 +1,14 @@
+dset ./OUT_RRI/HS_%y4%m2%d2%h200.bin
+*dset V_1980.bin
+options template yrev
+*undef -9.99e+08
+undef -9999
+title  OUTPUT FROM WRF V3.3.1 MODEL
+XDEF  475 LINEAR 73.3083333333 0.016666666667
+YDEF  383 LINEAR 13.0666666666 0.016666666667
+zdef   27 linear 1 1  
+tdef 300000 linear 0Z01Aug2024      24hr      
+VARS   1
+pr         1  0  ACCUMULATED TOTAL GRID SCALE PRECIPITATION (mm)
+ENDVARS
+

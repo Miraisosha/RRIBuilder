@@ -119,9 +119,9 @@ void CWebRRIPageGeneralDlg::OnBnClickedBtnRecvDir()
 {
 	CWnd* pMain = GetParent()->GetParent();
 	if (pMain) {
-		pMain->SendMessage(
-			WM_WEBRRI_EVENT,
-			WEBRRI_EVT_SELECT_FOLDER,
-			IDC_EDIT_RECV_DIR);
+//		pMain->SendMessage(
+//			WM_WEBRRI_EVENT,
+//			WEBRRI_EVT_SELECT_FOLDER,
+//			IDC_EDIT_RECV_DIR);
 	}
 }

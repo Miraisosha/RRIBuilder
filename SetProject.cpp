@@ -234,13 +234,18 @@ BOOL CSetProject::Set_DSET()
 	//
 	CString		cmd;
 	ProjDir.Format("%s/Project/%s", m_BootPath, DSET.Proj_Title);
+	ProjRRIDir.Format("%s/Project/%s/%s", m_BootPath, DSET.Proj_Title, RRI_DIR_NAME);
 	Shift_Unix(&ProjDir);
+	Shift_Unix(&ProjRRIDir);
 	//
 	cmd.Format("Project Folder is created at following folder...OK ?\n [ %s ]", ProjDir);
 	if (MessageBox(cmd, "ask", MB_YESNO | MB_ICONQUESTION) == IDNO) {
 		if (!Button_Dir(&ProjDir, m_RecentPath)) return FALSE;
 	}
+
 	strcpy(DSET.Proj_Folder, ProjDir);
+	strcpy(DSET.Proj_WebRRIFolder, ProjDir);
+
 	if (Folder_Exist(ProjDir) ) {	// 既存
 		if (MessageBox("Folder already exists. Delete all files ?", "Alarm", MB_YESNO | MB_ICONQUESTION) == IDYES) {
 			Delete_Folder(DSET.Proj_Folder);
@@ -248,6 +253,16 @@ BOOL CSetProject::Set_DSET()
 		}
 	}
 	else  CreateDirectory(DSET.Proj_Folder, NULL);
+
+
+
+	// ----------------------------------------------------
+	// 2026/05/24 Add
+	strcpy(DSET.Proj_Folder, ProjRRIDir);
+	if (!Folder_Exist(DSET.Proj_Folder)) {
+		CreateDirectory(DSET.Proj_Folder, NULL);
+	}
+	
 	//
 	/// フォルダー内に作るサブフォルダの名前
 	for (int i = 0; i < File_Folder_Num; i++) {

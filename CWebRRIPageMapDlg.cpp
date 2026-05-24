@@ -150,7 +150,7 @@ void CWebRRIPageMapDlg::OnBnClickedBtnSlopelengthMap()
 		pMain->GetParent()->SendMessage(
 			WM_WEBRRI_EVENT,
 			WEBRRI_EVT_SELECT_FILE,
-			IDC_EDIT_SLOPE_MAP);
+			IDC_EDIT_SLOPELENGTH_MAP);
 	}
 }
 

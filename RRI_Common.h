@@ -24,8 +24,8 @@
 #define		MANNING_FILE				".\\RRI_CONTENTS\\LANDUSE\\MANNING.csv"
 #define		MANNING_FILE_JA				".\\RRI_CONTENTS\\LANDUSE\\MANNING_JA.csv"
 
-#define		COVER_TITLE				"topo\\Cover.txt"
-#define		SOIL_TITLE				"topo\\Soil.txt"
+#define		COVER_TITLE				"\\INPUTS\\parameters\\Cover.txt"
+#define		SOIL_TITLE				"\\INPUTS\\parameters\\Soil.txt"
 
 #define		GLC_PATH					".\\RRI_CONTENTS\\LANDUSE\\GLCNMO"
 #define		EXTRACT_PATH				".\\RRI_CONTENTS\\LANDUSE\\GLCNMO\\EXDIR"
@@ -155,7 +155,6 @@
 #define		LAND_SOIL		NOT_IN_NUM_START + 1		// Land topo/Soil.txt
 // 2019.06.02
 #define		LU_FILE_JP		NOT_IN_NUM_START + 2		// LandUse JP
-
 
 /*
 */
@@ -350,6 +349,7 @@ typedef		struct  _DATASET {
 	CTime	BT;
 	//--------------------------------------------- Basic Folder & File
 	char		Proj_Folder[SIZE_02K];
+	char		Proj_WebRRIFolder[SIZE_02K];	// 2026/05/24 Add
 	char		Proj_Title[SIZE_02K];
 	char		Folder_Name[8][SIZE_02K];
 	char		EX_Dem_File[SIZE_02K];			// 外部のDEMデータファイル
@@ -370,6 +370,7 @@ typedef		struct  _DATASET {
 	BOOL		out_exist[ FILE_OUT_NUM ],out_use[ FILE_OUT_NUM ];
 //
 	char		InputFile[SIZE_02K];
+	char		InputWebRRIFile[SIZE_02K];		// 2026/05/24 Add
 	//
 	char		File_names[FILE_ALL_NUM][SIZE_02K], Input_names[FILE_ALL_NUM][SIZE_02K];
 	char		Out_names[FILE_OUT_NUM][SIZE_02K];
@@ -681,3 +682,6 @@ bool CopyDataToMesh(int Did, double** data, MINFO** MESH, const PARAMS& PM);
 #define MID_VER		1		//中間版（SED機能なし）
 #define FULL_VER	2		//完全版
 #define APP_VERSION	SIMP_VER
+
+
+#define RRI_DIR_NAME "SIMU/old_rri/"

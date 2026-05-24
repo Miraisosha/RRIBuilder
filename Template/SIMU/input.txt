@@ -1,0 +1,185 @@
+&JOBNAME
+      runname = 'Krishna'
+      para_dir = '../INPUTS/parameters/'
+      data_dir ='../INPUTS/DIRECT/'
+      result1_dir = './'
+      result2_dir = './'
+      simulation_dir = './'
+      recv_dir = './recover/'
+/
+
+&MODEL_MODE
+      RRI = .true.
+      MIXED = .false.
+/
+
+&IN_BOUNDARY
+      IN_BOUND = .false.
+      IN_FILE = 'Koryoume_discharge.txt'
+      X_GRID = 257
+      Y_GRID = 221
+/
+
+&TIMESTEP
+      initime = '2024-02-15:00:00:00'
+      tstart = 0
+      tstop = 7776000
+      dt_couple = 3600
+      dtlsm = 3600
+      dthydro = 3600
+      recv_mode = 0
+/
+
+&POSITION
+      latsw = 6.96532701450001
+      latne = 7.82080026964
+      lonsw = 125.1825
+      lonne = 125.72313
+      xsw = 239757.832456421
+      xne = 1085712.20489973
+      ysw = 638653.064835116
+      yne = 1651206.76664363
+/
+
+&GRID
+      dx = 463.6869
+      dy = 460.7287
+      dzroot = 0.2
+      dzdeep = 0.4
+/
+
+&MAPFILE
+      gridarea_map = 'cell_area.asc'
+      elevation_map = 'aadem.txt'
+      direction_map = 'aadir.txt'
+      accumulation_map = 'acc.txt'
+      width_map = ''
+      depth_map = ''
+      levee_map = ''
+      slopelength_map = ''
+      slopeangle_map = ''
+      soildepth_map = ''
+      acquiferdepth_map = ''
+      zref_map = ''
+      met_alt_map = ''
+      land_map = 'lu-f.asc'
+      soil_map = 'su-f.asc'
+      soil_code = 'soil_code.txt'
+      soil_table = 'soil_water_para.dat'
+      met_map = ''
+/
+
+&TOPOGRAPHY
+      ele0 = 1000.0
+      slope0 = 0.05
+      length0 = 300.0
+      Ds0 = 0.250
+      deldpth = 2.0
+      zwind0 = 10.0
+/
+
+&INITSOIL
+      sfcdat = 1
+      vegfromtype = 1
+      styp = 4
+      vtyp = 3
+      lai0 = 0.3
+      veg0 = 0.5
+      soilinit = 1
+      tslnd0 = 300.0
+      tscanp0 = 300.0
+      tswtr0 = 300.0
+      tsoil0 = 300.0
+      vlcsfc0 = 0.0
+      vlcrt0 = 0.0
+      vlcdp0 = 0.0
+      wetcanp0 = 0.0
+      wetg0 = 0.0
+      snowc0 = 0.0
+      snowg0 = 0.0
+      tsprt = 0.0
+      tcprt = 0.0
+      t2prt = 0.0
+      wgrat = 0.950
+      wrtrat = 0.950
+      w2rat = 0.950
+/
+
+&LSMMODEL
+      rstopt = 0
+/
+
+&MISC
+      SSTMAX_CALIB = 0.10
+      KSAT1_CALIB = 1.0
+      KSAT2_CALIB = 1.0
+      ROUGHNESS_N_CALIB = 0.3
+      RIVER_ROUGHNESS_OVERRIDE = 0.03
+      ANIK_CALIB = 1.0
+      GAUGEPOINT_SUBCATCHMENT = 'ws100'
+      riv_thres_in = 20
+      width_param_c_in = 4.3
+      width_param_s_in = 0.2
+      depth_param_c_in = 0.4
+      depth_param_s_in = 0.1
+      height_param_in = 0.0
+      height_limit_param_in = 20.0
+      GAUGEPOINT_FLOWINT = -1
+      OMP_NUM_THREADS = 12
+/
+
+&INPUT
+      INICON_CFG = 0
+      fixed_inisub = 1
+      fixed_finsub = 9
+      READ_REL_HUM = .false.
+      UPD_PSFC = .false.
+      UPD_TAIR = .false.
+      READ_SEPARATE_U_V = .true.
+      PREFIXES = 'TA_,LW_,SW_,CC_,U_,SH_,PS_,RH_,V_'
+      PREFIX_RAIN = 'NRT_'
+      METEO_INPUT_TYPE = 3
+      RAINFALL_INPUT_TYPE = 2
+      MONTHLY_LAIFPAR = .false.
+/
+
+&OUTPUT
+      OUT1_CODESTART = 1
+      OUT1_CODEEND = 9
+      OUT1_FLOWINT = -1
+      discharge(1)%single_year = .true.
+/
+
+&OUTPUT_DIS
+      STION(1)%name = 'OUT'
+      STION(1)%LOC_I = 148
+      STION(1)%LOC_J = 91
+
+      STION(2)%name = 'Right'
+      STION(2)%LOC_I = 148
+      STION(2)%LOC_J = 94
+
+      STION(3)%name = 'Left'
+      STION(3)%LOC_I = 145
+      STION(3)%LOC_J = 92
+/
+
+&debugging
+      POINTSCALE_I = -1
+      POINTSCALE_J = -1
+/
+
+&snow
+		TH_SNOW = 0.0
+ /
+
+&bats
+		TH_SNOW = 0.0
+		visalbedo = 0.85
+		niralbedo = 0.65
+ /
+
+&dam_control
+      dam_switch = 0
+      damfile = 'dam_info.txt'
+/

@@ -54,6 +54,10 @@
 #include		"CSetSedNo.h"   //20211004 Add
 #include		<algorithm>		//20211004 Add
 
+#include		"ProjectUtil.h"
+#include		"WebRRIInput.h"
+#include		"Global.h"
+
 //#define		WM_ASEDIT_ENCHANGE	0x8888	// 0-WM_APP(0x8000) Reserved  
 											// Application Message Area  0x8000-0xBFFF
 											// Application String Message  Area  0xC000 - 0xFFFF  0x10000- Reserved
@@ -2307,7 +2311,7 @@ void CRRI_GUIView::OnTimer(UINT_PTR nIDEvent)
 		//  プロジェクトの新規作成　
 		///==========================================================================
 
-		if (CREAT == 1) {	
+		if (CREAT == CREATE_RRI_NEW) {	
 			///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 			//  フォルダの作成
 			///___________________________________________________________________
@@ -2404,9 +2408,9 @@ void CRRI_GUIView::OnTimer(UINT_PTR nIDEvent)
 		///==========================================================================
 		//  既存プロジェクトの読み込み　	 CREAT = 2	
 		///==========================================================================
-		else {
+		else if (CREAT == CREATE_RRI_LOAD) {
 			CString	file_RRI;					//***  ファイル読込
-			if (!Button_File(TRUE, &file_RRI, m_RecentPath,"RRI_Input","txt")) {
+			if (!Button_File(TRUE, &file_RRI, m_RecentPath, "RRI_Input", "txt")) {
 				DestroyWindow(); exit(1);
 			}
 			strcpy(DSET.InputFile, file_RRI);
@@ -2418,7 +2422,7 @@ void CRRI_GUIView::OnTimer(UINT_PTR nIDEvent)
 			int ret;
 			//
 			Change_Cursor(&Gp, IDC_WAIT);			//***  リロード
-			if ((ret=Reload_Project()) ){			// 通常 RETURN=０
+			if ((ret = Reload_Project())) {			// 通常 RETURN=０
 				Change_Cursor(&Gp, IDC_ARROW);
 				DestroyWindow(); exit(1);
 			}
@@ -2436,19 +2440,19 @@ void CRRI_GUIView::OnTimer(UINT_PTR nIDEvent)
 			STAT(PROC_CONFIRM_MESH) = TRUE;
 			//
 			if (PM.B_LatLng) {
-				PM.endLNG = PM.stLNG + PM.MHnum *1. / PM.Coord_Unit;
-				PM.endLAT = PM.stLAT + PM.MVnum *1. / PM.Coord_Unit;
+				PM.endLNG = PM.stLNG + PM.MHnum * 1. / PM.Coord_Unit;
+				PM.endLAT = PM.stLAT + PM.MVnum * 1. / PM.Coord_Unit;
 			}
 			else {
-				PM.endUTM_X = PM.stUTM_X + PM.MHnum*PM.UTMsize;
-				PM.endUTM_Y = PM.stUTM_Y + PM.MVnum*PM.UTMsize;
+				PM.endUTM_X = PM.stUTM_X + PM.MHnum * PM.UTMsize;
+				PM.endUTM_Y = PM.stUTM_Y + PM.MVnum * PM.UTMsize;
 			}
 			//
 			Calc_Unit_Area();
 			if (PM.B_LatLng)	Set_RectArea();
 			else				Set_UTMArea();
 			//
-			if(PM.B_LatLng ) Make_Back_Image();
+			if (PM.B_LatLng) Make_Back_Image();
 			//
 			Make_Mesh_Line();
 			Make_Mesh_Model();
@@ -2539,9 +2543,320 @@ void CRRI_GUIView::OnTimer(UINT_PTR nIDEvent)
 				fclose(fp);
 			}
 			//
-			CWnd*	cw = GetDlgItem(ID_PICT);
+			CWnd* cw = GetDlgItem(ID_PICT);
 			cw->SetFocus();
 
+		}
+		else if (CREAT == CREATE_WEB_RRI_NEW) {
+			///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			//  フォルダの作成
+			///___________________________________________________________________
+			if (FAILED(Define_Folder())) {
+				DestroyWindow(); exit(1);
+			}
+			for (int i = 0; i < 7; i++)
+				sprintf(DSET.Folder_Name[i], "%s\\%s", DSET.Proj_Folder, File_Folder_Name[i]);
+			// -----------------------------------------------------------
+			// テンプレートファイル　コピー
+			CString templatePath;
+			CString exeFolder = GetExeFolder();
+			templatePath.Format( "%s\\Template", exeFolder );
+			if (!CopyTemplateFolder(templatePath, DSET.Proj_WebRRIFolder))
+			{
+				AfxMessageBox("Template copy failed.");
+				DestroyWindow();
+				exit(1);
+			}
+
+			///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			//  ガイド画面からの作成
+			///___________________________________________________________________
+			if (PM.B_UseGuide) {
+				sprintf(DSET.InputFile, "%s/RRI_Input.txt", DSET.Proj_Folder);
+				B_Change_RRI = TRUE;
+				//
+				Show_Init_Guide();		// テクスチャー登録、OBJID_BACK にガイドを表示
+				STAT(ON_SCREEN) = TRUE;
+				STAT(PROC_INDICATE_RIVMESH) = TRUE;
+				Disp_Controls();
+			}
+			///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			//  外部　DEM ACC DIR データの読み込み DEM_EDITORを通したデータを読み込むため
+			/// DEMだけではなく、ACC DIRを読み込むこととし、土研のプログラムを使用しないこととした。2016/2
+			//___________________________________________________________________
+			else {
+				//Read_Dem();	// Read_3_Files　を使用するため、使用停止 
+				///　基本的な設定　　EX_** をDSET.File_namesにセット
+				CString		Target;
+				char			Title[SIZE_01K];
+				// 
+				sprintf(DSET.InputFile, "%s/RRI_Input.txt", DSET.Proj_Folder);
+				// DEM
+				Get_Title(DSET.EX_Dem_File, Title);
+				sprintf(DSET.File_names[ADEM_FILE], "%s/INPUTS/parameters/%s", DSET.Proj_WebRRIFolder,Title);
+				CopyFile( DSET.EX_Dem_File,DSET.File_names[ADEM_FILE],TRUE);
+				// ACC
+				Get_Title(DSET.EX_Acc_File, Title);
+				sprintf(DSET.File_names[ACC_FILE], "%s/INPUTS/parameters/%s", DSET.Proj_WebRRIFolder, Title);
+				CopyFile( DSET.EX_Acc_File, DSET.File_names[ACC_FILE],TRUE);
+				// DIR
+				Get_Title(DSET.EX_Dir_File, Title);
+				sprintf(DSET.File_names[ADIR_FILE], "%s/INPUTS/parameters/%s", DSET.Proj_WebRRIFolder, Title);
+				CopyFile(DSET.EX_Dir_File, DSET.File_names[ADIR_FILE], TRUE);
+
+				flushall();
+				//--------------------------
+				Read_3_Files(TRUE);
+				//--------------------------
+
+				CDATA = ACC_FILE;
+				STAT(USE_EXTERNAL_DEM) = TRUE;
+				STAT(PROC_CONFIRM_MESH) = TRUE;
+				STAT(READ_ADEM_ONLY) = FALSE;  // FALSE 変更　2016/2
+
+				DSET.in_use[ADEM_FILE] = DSET.in_avail[ADEM_FILE] = TRUE;
+				DSET.in_use[ACC_FILE] = DSET.in_avail[ACC_FILE] = TRUE;
+				DSET.in_use[ADIR_FILE] = DSET.in_avail[ADIR_FILE] = TRUE;
+				//
+				if (PM.B_LatLng) {
+					PM.endLAT = PM.stLAT + PM.MVnum*PM.Size;
+					PM.endLNG = PM.stLNG + PM.MHnum*PM.Size;
+					Set_RectArea();
+				}
+				else {	// UTM
+					PM.endUTM_Y = PM.stUTM_Y + PM.MVnum*PM.UTMsize;
+					PM.endUTM_X = PM.stUTM_X + PM.MHnum*PM.UTMsize;
+					Set_UTMArea();
+				}
+				//
+				Calc_Unit_Area();
+				Disp_Controls();
+				//
+				if (PM.B_LatLng) {
+					Make_Back_Image();
+					Make_Mesh_Model();
+					Make_Mesh_Line();
+					Make_Mesh_Area();
+					Make_LEGEND();		// 作り直し
+					GL_Redraw(&Gp, TRUE, TRUE, TRUE, ALL_OBJECTS, TRUE);
+				}
+				else {
+					Make_Mesh_Model();
+					Make_Mesh_Area();
+					Make_LEGEND();		// 作り直し
+					GL_Redraw(&Gp, TRUE, TRUE, TRUE, ALL_OBJECTS, TRUE);
+				}
+				//
+				PM.set = PM.Model = TRUE;
+				PM.Values = Make_Matrix(PM.MHnum, PM.MVnum, 0.);	/// 2016/3 追加
+			}
+			// 降雨データメッシュサイズの仮設定
+			DSET.Rain_dx = DSET.Rain_dy = 1. / PM.Deg_Unit;
+
+			// ----------------------------------------------------------
+			// WEB_RRI input.txt読み込み
+			CString inputPath;
+			inputPath.Format("%s/SIMU/input.txt", DSET.Proj_WebRRIFolder);
+			if (!LoadWebRRIInput( inputPath, g_WebRRIInput))
+			{
+				AfxMessageBox("load failed");
+				DestroyWindow(); exit(1);
+			}
+		}
+		else if (CREAT == CREATE_WEB_RRI_LOAD) {
+			CString templatePath;
+			CString exeFolder = GetExeFolder();
+			templatePath.Format( "%s\\Template", exeFolder );
+			// ----------------------------------------------------------
+			// プロジェクトフォルダ選択
+			CString initPath;
+			CString selectedFolder;
+			CFolderPickerDialog dlg(
+				initPath,
+				OFN_PATHMUSTEXIST,
+				this,
+				0
+			);
+			dlg.m_ofn.lpstrTitle = _T("Please select a WEB-RRI project folder.");
+			if (dlg.DoModal() != IDOK)
+			{
+				DestroyWindow(); exit(1);
+			}
+			selectedFolder = dlg.GetPathName();
+
+			// ----------------------------------------------------------
+			// Templateフォルダの構成とチェック
+			CString errorMsg;
+			if (!CheckProjectStructure( templatePath, selectedFolder, errorMsg)) {
+				AfxMessageBox( _T("Project structure error.\r\n\r\n") + errorMsg );
+				DestroyWindow(); exit(1);
+			}
+			strcpy(DSET.Proj_WebRRIFolder, selectedFolder);
+			CString oldRRIFolder;
+			oldRRIFolder.Format("%s/%s",selectedFolder, RRI_DIR_NAME);
+			strcpy(DSET.Proj_Folder, oldRRIFolder);
+
+			// ----------------------------------------------------------
+			// WEB_RRI input.txtチェック
+			CString inputPath;
+			if (!CheckInputFile( DSET.Proj_WebRRIFolder, inputPath)) {
+				AfxMessageBox( "input.txt not found.\r\n" "Please check the project folder." );
+				DestroyWindow(); exit(1);
+			}
+			strcpy(DSET.InputWebRRIFile, inputPath);
+
+			// ----------------------------------------------------------
+			CString	file_RRI;					//***  ファイル読込
+			file_RRI.Format("%s/RRI_input.txt", DSET.Proj_Folder);
+			strcpy(DSET.InputFile, file_RRI);
+			//
+			for (int i = 0; i < 7; i++)
+				sprintf(DSET.Folder_Name[i], "%s\\%s", DSET.Proj_Folder, File_Folder_Name[i]);
+
+			// ----------------------------------------------------------
+			// RRI_input.txt読み込み
+			int ret;
+			//
+			Change_Cursor(&Gp, IDC_WAIT);			//***  リロード
+			if ((ret = Reload_Project())) {			// 通常 RETURN=０
+				Change_Cursor(&Gp, IDC_ARROW);
+				DestroyWindow(); exit(1);
+			}
+			//
+			CEX_LABEL = CEX = PM.EXnum;
+			Disp_Controls();
+			//
+			GLobj_Delete(&Gp, OBJID_BACK);
+			GLobj_Delete(&Gp, OBJID_AREA);
+			GLobj_Delete(&Gp, OBJID_MESH);
+			GLobj_Delete(&Gp, OBJID_WORK);
+
+			///  メッシュの表示
+			CDATA = ACC_FILE;
+			STAT(PROC_CONFIRM_MESH) = TRUE;
+			//
+			if (PM.B_LatLng) {
+				PM.endLNG = PM.stLNG + PM.MHnum * 1. / PM.Coord_Unit;
+				PM.endLAT = PM.stLAT + PM.MVnum * 1. / PM.Coord_Unit;
+			}
+			else {
+				PM.endUTM_X = PM.stUTM_X + PM.MHnum * PM.UTMsize;
+				PM.endUTM_Y = PM.stUTM_Y + PM.MVnum * PM.UTMsize;
+			}
+			//
+			Calc_Unit_Area();
+			if (PM.B_LatLng)	Set_RectArea();
+			else				Set_UTMArea();
+			//
+			if (PM.B_LatLng) Make_Back_Image();
+			//
+			Make_Mesh_Line();
+			Make_Mesh_Model();
+			RefreshSedRectLine();
+			Make_Mesh_Area();
+			Make_LEGEND();		/// 作り直し
+			//
+			PM.Values = Make_Matrix(PM.MHnum, PM.MVnum, 0.);
+			//
+			GL_Redraw(&Gp, TRUE, TRUE, TRUE, ALL_OBJECTS, TRUE);
+			PM.set = PM.Model = TRUE;
+
+			// 2019.07.08 JFlow時のMESH.AtLng,ATLat 情報復元
+			if (PM.B_UseJFlow) {
+				double lat, lng;
+				int h, v;
+
+				lat = PM.endLAT;
+				lng = PM.stLNG;
+
+				h = 0;
+				v = 0;
+
+				while (lng < PM.endLNG)
+				{
+					if (h + 1 > PM.MHnum)
+					{
+						break;
+					}
+					while (lat > PM.stLAT)
+					{
+						if (v + 1 > PM.MVnum)
+						{
+							break;
+						}
+
+						MESH[PM.MVnum - v - 1][h].AtLng = lng;
+						MESH[PM.MVnum - v - 1][h].AtLat = lat;
+
+						lat -= PM.Size;
+						v++;
+
+					}
+
+					lat = PM.endLAT;
+					lng += PM.Size;
+					h++;
+					v = 0;
+				}
+			}
+
+			// MANNING_JAファイル読み込み
+			//
+			//--------------------------------------------------
+			/*
+			必要なファイル　　Manning係数  Manning.csv   ->  Darcy = 1 GreenAmpt = 0 by Kswitch to appno
+			Darcy　適用の場合(山地）		ka = 0.
+			GreenAmpt 適用の場合(平地）	ksv =0.
+			*/
+			::SetCurrentDirectory(m_BootPath);
+			/*
+			マニング係数　　 Manning.csvの読み込み　２０種類コード
+			*/
+			//--------------------------------------------------
+			char	buf[SIZE_16K], inchar[SIZE_01K];
+			int		pos;
+			double	Manning[20] = { 0 };	// マニング係数
+			int		Kswitch[20] = { 0 };	// Darcy(1) or GAmpt(0)
+			int		MNnum = 20;
+			FILE* fp;
+
+			if (PM.B_UseJFlow) {
+				MNnum = 5;
+
+				if ((fp = fopen(MANNING_FILE_JA, "r")) == NULL) {
+					MessageBox("** Error ** Manning file not exist", "error", MB_OK | MB_ICONEXCLAMATION);
+					RETURN("** Error ** Manning file not exist");
+				}
+
+				fgets(buf, SIZE_16K, fp);  // Terms
+				for (int m = 0; m < MNnum; m++) {
+					fgets(buf, SIZE_16K, fp); pos = 0;
+					getstr(buf, &pos, inchar, SIZE_01K); // NO;
+					getstr(buf, &pos, inchar, SIZE_01K); Manning[m] = atof(inchar);
+					getstr(buf, &pos, inchar, SIZE_01K); Kswitch[m] = atoi(inchar);
+					strcpy(Cover_Name[m], &buf[pos]);
+				}
+				fclose(fp);
+			}
+			//
+			CWnd* cw = GetDlgItem(ID_PICT);
+			cw->SetFocus();
+
+
+			// ----------------------------------------------------------
+			// WEB_RRI input.txt読み込み
+			if (!LoadWebRRIInput( inputPath, g_WebRRIInput))
+			{
+				AfxMessageBox("load failed");
+				DestroyWindow(); exit(1);
+			}
+
+		}
+		else {
+			CString msg;
+			msg.Format( "Unknown project mode. CREAT = %d", CREAT );
+			MessageBox(msg, "error", MB_OK | MB_ICONEXCLAMATION);
+			RETURN("** Error ** Manning file not exist");
 		}
 		//
 		STAT(ON_SCREEN) = TRUE;
@@ -11616,8 +11931,17 @@ bool CRRI_GUIView::SaveSedInputFile() {
 
 void CRRI_GUIView::OnBnClickedEditWebRri()
 {
+	CString inputPath;
+	inputPath.Format("%s/SIMU/input.txt", DSET.Proj_WebRRIFolder);
 	CWebRRIInputDlg dlg;
-	dlg.DoModal();
+	dlg.m_input			= g_WebRRIInput;
+	dlg.m_inputPath		= inputPath;
+	dlg.m_projFolder	= DSET.Proj_WebRRIFolder;
+
+	if (dlg.DoModal() == IDOK)
+	{
+		g_WebRRIInput = dlg.m_input;
+	}
 }
 
 void CRRI_GUIView::OnBnClickedRunWebRri()

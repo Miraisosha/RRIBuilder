@@ -61,8 +61,15 @@ BOOL CRRI_GUIApp::InitInstance()
 	// アプリケーション マニフェストが visual スタイルを有効にするために、
 	// ComCtl32.dll Version 6 以降の使用を指定する場合は、
 	// Windows XP に InitCommonControlsEx() が必要です。さもなければ、ウィンドウ作成はすべて失敗します。
+
+//	INITCOMMONCONTROLSEX InitCtrls;
+//	InitCtrls.dwSize = sizeof(InitCtrls);
 	INITCOMMONCONTROLSEX InitCtrls;
 	InitCtrls.dwSize = sizeof(InitCtrls);
+
+	InitCtrls.dwICC =
+		ICC_WIN95_CLASSES |
+		ICC_DATE_CLASSES;
 	// アプリケーションで使用するすべてのコモン コントロール クラスを含めるには、
 	// これを設定します。
 	InitCtrls.dwICC = ICC_WIN95_CLASSES;
@@ -70,9 +77,10 @@ BOOL CRRI_GUIApp::InitInstance()
 
 	CWinApp::InitInstance();
 //	afxAmbientActCtx = FALSE; // <<-- Add this line 20141024
+
 #ifdef _DEBUG
-	CWebRRIInputDlg dlg;
-	dlg.DoModal();
+	//CWebRRIInputDlg dlg;
+	//dlg.DoModal();
 #endif
 
 

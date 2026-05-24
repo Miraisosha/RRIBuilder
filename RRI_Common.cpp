@@ -1853,12 +1853,29 @@ int		Set_File_FullName(DATASET* DS)
 	for (int f = 0; f < FILE_IN_NUM; f++) {
 		if (strlen(DS->Input_names[f]) == 0) continue;
 		//
-		sprintf(DS->File_names[f], "%s%s", DS->Proj_Folder, &DS->Input_names[f][1]);
+		CString path = DS->Input_names[f];
+		int pos = path.ReverseFind('/');
+		CString fileName = path.Mid(pos + 1);
+		if (path.Find("./riv") == 0) {
+			sprintf(DS->File_names[f], "%s/INPUTS/parameters/%s", DS->Proj_WebRRIFolder, fileName);
+		} 
+		else if (path.Find("./topo") == 0) {
+			sprintf(DS->File_names[f], "%s/INPUTS/parameters/%s", DS->Proj_WebRRIFolder, fileName);
+		}
+		else if (path.Find("./rain") == 0) {
+			sprintf(DS->File_names[f], "%s/INPUTS/DIRECT/%s", DS->Proj_WebRRIFolder, fileName);
+		}
+		else if (path.Find("./out") == 0) {
+			sprintf(DS->File_names[f], "%s/SIMU/OUT_RRI/%s", DS->Proj_WebRRIFolder, fileName);
+		}
+		else {
+			sprintf(DS->File_names[f], "%s%s", DS->Proj_Folder, &DS->Input_names[f][1]);
+		}
 	}
 	///
 	//  Cover  Soil ファイルの定義
-	sprintf(DS->CoverFile, "%s\\%s", DS->Proj_Folder, COVER_TITLE);
-	sprintf(DS->SoilFile, "%s\\%s", DS->Proj_Folder, SOIL_TITLE);
+	sprintf(DS->CoverFile, "%s\\%s", DS->Proj_WebRRIFolder, COVER_TITLE);
+	sprintf(DS->SoilFile, "%s\\%s", DS->Proj_WebRRIFolder, SOIL_TITLE);
 	//
 	return 0;
 }
