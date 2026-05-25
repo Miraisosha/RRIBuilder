@@ -219,7 +219,7 @@ int			BOUND_ID[] = { IDC_BUTTON_B_201, IDC_BUTTON_B_202, IDC_BUTTON_B_203, IDC_B
 ///
 /////////////////////////////////////////////////////////////////////////////  TAB 3
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
-int			TAB_3_NUM = 70;
+int			TAB_3_NUM = 68;
 
 int			TAB_3_ID[] = {
 	IDC_STATIC_GB_30, IDC_STATIC_GB_31,IDC_STATIC_GB_41, IDC_STATIC_GB_43,
@@ -232,7 +232,7 @@ int			TAB_3_ID[] = {
 	IDC_STATIC_402, IDC_STATIC_403, IDC_STATIC_404, IDC_STATIC_405,
 	IDC_MESHINFO_1, IDC_MESHINFO_2, IDC_MESHINFO_3, IDC_MESHINFO_4, IDC_MESHINFO_5,
 
-	IDC_BUTTON_401, IDC_BUTTON_404, IDC_BUTTON_LIST, IDC_BUTTON_BACK,
+	IDC_BUTTON_401, IDC_BUTTON_LIST, IDC_BUTTON_BACK,
 
 	IDC_BUTTON_RESET, IDC_BUTTON_CANCEL, IDC_BUTTON_DIR_UNDO,
 
@@ -249,7 +249,7 @@ int			TAB_3_ID[] = {
 
 	IDC_SLIDER_TRANS,  IDC_SLIDER_TRANS2,
 	IDC_COMBO_DATA,
-	IDC_STATIC_GB_REMAIN, IDC_BUTTON_RRI, 
+	IDC_STATIC_GB_REMAIN,
 	IDC_RUN_WEB_RRI,IDC_EDIT_WEB_RRI };
 //
 int			MESH_COLOR_ID[] = { IDC_MESHCOLOR_1, IDC_MESHCOLOR_2, IDC_MESHCOLOR_3, IDC_MESHCOLOR_6,
@@ -260,11 +260,11 @@ int			DIRECT_ID[] = {	IDC_RADIO_E,IDC_RADIO_SE,IDC_RADIO_S,
 							IDC_RADIO_N, IDC_RADIO_NE,IDC_RADIO_TERM};
 
 ///------------------------------------------------------------------------------- Avail Buttons
-int		AVAIL_NUM[3]		= { 6, 6, 11 };
+int		AVAIL_NUM[3]		= { 6, 6, 10 };
 int		TAB_1_AVAIL[6] = { IDC_BUTTON_104, IDC_BUTTON_105, IDC_BUTTON_UNDO, IDC_BUTTON_CSPARAM,	// Add 201601 20190201 Modify [4] -> [5]
 							IDC_BUTTON_LANDUSE_JP, IDC_BUTTON_LANDUSE_JP2};	// 20190201 Add
 int		TAB_2_AVAIL[6] = { IDC_BUTTON_201, IDC_BUTTON_206,IDC_BUTTON_207, IDC_BUTTON_208, IDC_BUTTON_210 ,IDC_BUTTON_214}; 
-int		TAB_3_AVAIL[11]	= { IDC_BUTTON_401, IDC_BUTTON_404, 
+int		TAB_3_AVAIL[10]	= { IDC_BUTTON_401,  
 							IDC_CHECK_OP_1, IDC_CHECK_OP_2, IDC_CHECK_OP_3, IDC_CHECK_OP_6, IDC_CHECK_OP_7,
 							IDC_SLIDER_TRANS,IDC_SLIDER_TRANS2,
 							IDC_RUN_WEB_RRI,IDC_EDIT_WEB_RRI };
@@ -11946,7 +11946,49 @@ void CRRI_GUIView::OnBnClickedEditWebRri()
 
 void CRRI_GUIView::OnBnClickedRunWebRri()
 {
-	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+//	CString	Org, Tar;
+	int			ret;
+	char		Org[SIZE_1K], Tar[SIZE_1K];
+	//
+	if(MessageBox("Run RRI Program ... OK ?", "confirm", MB_YESNO | MB_ICONQUESTION) == IDNO ) return;
+	//
+#ifdef   VER_64
+	sprintf(Org, "%s\\RRI_CONTENTS\\BIN\\0_rri_1_4_2.exe", m_BootPath);
+	sprintf(Tar, "%s\\0_rri_1_4_2.exe", DSET.Proj_Folder);
+#else
+	sprintf(Org, "%s\\RRI_CONTENTS\\BIN32\\0_rri_1_4_2.exe", m_BootPath);
+	sprintf(Tar, "%s\\0_rri_1_4_2.exe", DSET.Proj_Folder);
+#endif
+	//
+	if (!(ret=CopyFile(Org, Tar, FALSE)) )	{			// ﾌｧｲﾙコピー
+		LPVOID	lpMessageBuffer;
+		CString	str;
+		//
+//		What_Is_Error(lpMessageBuffer);
+		//void		What_Is_Error(LPVOID lpMessageBuffer)
+		//{
+		//	//... 文字列が表示されます。
+		//	// システムによって確保されたバッファを開放します。
+		//	FormatMessage(
+		//		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		//		FORMAT_MESSAGE_FROM_SYSTEM,
+		//		NULL,
+		//		GetLastError(),
+		//		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // デフォルト ユーザー言語 
+		//		(LPTSTR)&lpMessageBuffer,
+		//		0,
+		//		NULL);
+		//}
+
+//		str.Format("** Error ** Missed copy Program File\n-->[ %d ] %s", GetLastError(), lpMessageBuffer);
+
+		MessageBox(str, "Alerm", MB_OK|MB_ICONERROR);
+//		LocalFree(lpMessageBuffer);
+		return;
+	}
+	//
+	::SetCurrentDirectory(DSET.Proj_Folder);
+	system(RRI_PROGRAM);
 }
 
 

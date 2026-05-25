@@ -237,21 +237,21 @@ void CWebRRIInputDlg::OnBnClickedSave()
         return;
     }
 
-    if (!SaveWebRRIInput(
-        m_inputPath,
-        m_input))
+    if (!SaveWebRRIInput( m_inputPath, m_input))
     {
         AfxMessageBox(_T("Save failed"));
         return;
     }
-
-    AfxMessageBox(_T("Saved"));
+    else {
+		CDialogEx::OnOK();
+    }
 }
 
 
 void CWebRRIInputDlg::OnBnClickedSaveAs()
 {
     SaveScreenToInput();
+
     CFileDialog dlg(
         FALSE,
         _T("txt"),
@@ -273,8 +273,9 @@ void CWebRRIInputDlg::OnBnClickedSaveAs()
         AfxMessageBox(_T("Save failed"));
         return;
     }
-
-    AfxMessageBox(_T("Saved"));
+    else {
+		CDialogEx::OnOK();
+    }
 }
 
 void CWebRRIInputDlg::LoadInputToScreen()
@@ -972,6 +973,35 @@ void CWebRRIInputDlg::SaveScreenToInput()
         m_input.DAM_CONTROL.damfile);
 }
 
+#include "stdafx.h"
+#include "WebRRIInput.h"
+
+// =====================================================
+// helper
+// =====================================================
+
+static CString ToFortranBool(BOOL value)
+{
+    return value
+        ? _T(".true.")
+        : _T(".false.");
+}
+
+static CString QuoteString(const CString& value)
+{
+    CString str;
+
+    str.Format(
+        _T("'%s'"),
+        value);
+
+    return str;
+}
+
+// =====================================================
+// Save
+// =====================================================
+
 BOOL SaveWebRRIInput(
     const CString& path,
     const WEB_RRI_INPUT& input)
@@ -992,91 +1022,440 @@ BOOL SaveWebRRIInput(
     // =====================================================
     // JOBNAME
 
-    line.Format(
-        _T("RUNNAME = %s\n"),
-        input.JOBNAME.runname);
+    file.WriteString(_T("&JOBNAME\n"));
+
+    line.Format(_T("      runname = %s\n"),
+        QuoteString(input.JOBNAME.runname));
     file.WriteString(line);
 
-    line.Format(
-        _T("PARA_DIR = %s\n"),
-        input.JOBNAME.para_dir);
+    line.Format(_T("      para_dir = %s\n"),
+        QuoteString(input.JOBNAME.para_dir));
     file.WriteString(line);
 
-    line.Format(
-        _T("DATA_DIR = %s\n"),
-        input.JOBNAME.data_dir);
+    line.Format(_T("      data_dir = %s\n"),
+        QuoteString(input.JOBNAME.data_dir));
     file.WriteString(line);
 
-    line.Format(
-        _T("RESULT1_DIR = %s\n"),
-        input.JOBNAME.result1_dir);
+    line.Format(_T("      result1_dir = %s\n"),
+        QuoteString(input.JOBNAME.result1_dir));
     file.WriteString(line);
 
-    line.Format(
-        _T("RESULT2_DIR = %s\n"),
-        input.JOBNAME.result2_dir);
+    line.Format(_T("      result2_dir = %s\n"),
+        QuoteString(input.JOBNAME.result2_dir));
     file.WriteString(line);
 
-    line.Format(
-        _T("SIMULATION_DIR = %s\n"),
-        input.JOBNAME.simulation_dir);
+    line.Format(_T("      simulation_dir = %s\n"),
+        QuoteString(input.JOBNAME.simulation_dir));
     file.WriteString(line);
 
-    line.Format(
-        _T("RECV_DIR = %s\n"),
-        input.JOBNAME.recv_dir);
+    line.Format(_T("      recv_dir = %s\n"),
+        QuoteString(input.JOBNAME.recv_dir));
     file.WriteString(line);
+
+    file.WriteString(_T("/\n\n"));
 
     // =====================================================
     // MODEL_MODE
 
-    line.Format(
-        _T("RRI = %d\n"),
-        input.MODEL_MODE.RRI);
+    file.WriteString(_T("&MODEL_MODE\n"));
+
+    line.Format(_T("      RRI = %s\n"),
+        ToFortranBool(input.MODEL_MODE.RRI));
     file.WriteString(line);
 
-    line.Format(
-        _T("MIXED = %d\n"),
-        input.MODEL_MODE.MIXED);
+    line.Format(_T("      MIXED = %s\n"),
+        ToFortranBool(input.MODEL_MODE.MIXED));
     file.WriteString(line);
+
+    file.WriteString(_T("/\n\n"));
+
+    // =====================================================
+    // IN_BOUNDARY
+
+    file.WriteString(_T("&IN_BOUNDARY\n"));
+
+    line.Format(_T("      IN_BOUND = %s\n"),
+        ToFortranBool(input.IN_BOUNDARY.IN_BOUND));
+    file.WriteString(line);
+
+    line.Format(_T("      IN_FILE = %s\n"),
+        QuoteString(input.IN_BOUNDARY.IN_FILE));
+    file.WriteString(line);
+
+    line.Format(_T("      X_GRID = %d\n"),
+        input.IN_BOUNDARY.X_GRID);
+    file.WriteString(line);
+
+    line.Format(_T("      Y_GRID = %d\n"),
+        input.IN_BOUNDARY.Y_GRID);
+    file.WriteString(line);
+
+    file.WriteString(_T("/\n\n"));
 
     // =====================================================
     // TIMESTEP
 
-    line.Format(
-        _T("INITIME = %s\n"),
-        input.TIMESTEP.initime);
+    file.WriteString(_T("&TIMESTEP\n"));
+
+    line.Format(_T("      initime = %s\n"),
+        QuoteString(input.TIMESTEP.initime));
     file.WriteString(line);
 
-    line.Format(
-        _T("TSTART = %d\n"),
+    line.Format(_T("      tstart = %d\n"),
         input.TIMESTEP.tstart);
     file.WriteString(line);
 
-    line.Format(
-        _T("TSTOP = %d\n"),
+    line.Format(_T("      tstop = %d\n"),
         input.TIMESTEP.tstop);
     file.WriteString(line);
 
-    line.Format(
-        _T("DT_COUPLE = %d\n"),
+    line.Format(_T("      dt_couple = %d\n"),
         input.TIMESTEP.dt_couple);
     file.WriteString(line);
 
-    line.Format(
-        _T("DTLSM = %d\n"),
+    line.Format(_T("      dtlsm = %d\n"),
         input.TIMESTEP.dtlsm);
     file.WriteString(line);
 
-    line.Format(
-        _T("DTHYDRO = %d\n"),
+    line.Format(_T("      dthydro = %d\n"),
         input.TIMESTEP.dthydro);
     file.WriteString(line);
 
-    line.Format(
-        _T("RECV_MODE = %d\n"),
+    line.Format(_T("      recv_mode = %d\n"),
         input.TIMESTEP.recv_mode);
     file.WriteString(line);
+
+    file.WriteString(_T("/\n\n"));
+
+    // =====================================================
+    // POSITION
+
+    file.WriteString(_T("&POSITION\n"));
+
+    line.Format(_T("      latsw = %.15f\n"),
+        input.POSITION.latsw);
+    file.WriteString(line);
+
+    line.Format(_T("      latne = %.15f\n"),
+        input.POSITION.latne);
+    file.WriteString(line);
+
+    line.Format(_T("      lonsw = %.15f\n"),
+        input.POSITION.lonsw);
+    file.WriteString(line);
+
+    line.Format(_T("      lonne = %.15f\n"),
+        input.POSITION.lonne);
+    file.WriteString(line);
+
+    line.Format(_T("      xsw = %.15f\n"),
+        input.POSITION.xsw);
+    file.WriteString(line);
+
+    line.Format(_T("      xne = %.15f\n"),
+        input.POSITION.xne);
+    file.WriteString(line);
+
+    line.Format(_T("      ysw = %.15f\n"),
+        input.POSITION.ysw);
+    file.WriteString(line);
+
+    line.Format(_T("      yne = %.15f\n"),
+        input.POSITION.yne);
+    file.WriteString(line);
+
+    file.WriteString(_T("/\n\n"));
+
+    // =====================================================
+    // GRID
+
+    file.WriteString(_T("&GRID\n"));
+
+    line.Format(_T("      dx = %.6f\n"),
+        input.GRID.dx);
+    file.WriteString(line);
+
+    line.Format(_T("      dy = %.6f\n"),
+        input.GRID.dy);
+    file.WriteString(line);
+
+    line.Format(_T("      dzroot = %.6f\n"),
+        input.GRID.dzroot);
+    file.WriteString(line);
+
+    line.Format(_T("      dzdeep = %.6f\n"),
+        input.GRID.dzdeep);
+    file.WriteString(line);
+
+    file.WriteString(_T("/\n\n"));
+
+    // =====================================================
+    // MAPFILE
+
+    file.WriteString(_T("&MAPFILE\n"));
+
+    line.Format(_T("      gridarea_map = %s\n"),
+        QuoteString(input.MAPFILE.gridarea_map));
+    file.WriteString(line);
+
+    line.Format(_T("      elevation_map = %s\n"),
+        QuoteString(input.MAPFILE.elevation_map));
+    file.WriteString(line);
+
+    line.Format(_T("      direction_map = %s\n"),
+        QuoteString(input.MAPFILE.direction_map));
+    file.WriteString(line);
+
+    line.Format(_T("      accumulation_map = %s\n"),
+        QuoteString(input.MAPFILE.accumulation_map));
+    file.WriteString(line);
+
+    line.Format(_T("      width_map = %s\n"),
+        QuoteString(input.MAPFILE.width_map));
+    file.WriteString(line);
+
+    line.Format(_T("      depth_map = %s\n"),
+        QuoteString(input.MAPFILE.depth_map));
+    file.WriteString(line);
+
+    line.Format(_T("      levee_map = %s\n"),
+        QuoteString(input.MAPFILE.levee_map));
+    file.WriteString(line);
+
+    line.Format(_T("      slopelength_map = %s\n"),
+        QuoteString(input.MAPFILE.slopelength_map));
+    file.WriteString(line);
+
+    line.Format(_T("      slopeangle_map = %s\n"),
+        QuoteString(input.MAPFILE.slopeangle_map));
+    file.WriteString(line);
+
+    line.Format(_T("      soildepth_map = %s\n"),
+        QuoteString(input.MAPFILE.soildepth_map));
+    file.WriteString(line);
+
+    line.Format(_T("      acquiferdepth_map = %s\n"),
+        QuoteString(input.MAPFILE.acquiferdepth_map));
+    file.WriteString(line);
+
+    line.Format(_T("      zref_map = %s\n"),
+        QuoteString(input.MAPFILE.zref_map));
+    file.WriteString(line);
+
+    line.Format(_T("      met_alt_map = %s\n"),
+        QuoteString(input.MAPFILE.met_alt_map));
+    file.WriteString(line);
+
+    line.Format(_T("      land_map = %s\n"),
+        QuoteString(input.MAPFILE.land_map));
+    file.WriteString(line);
+
+    line.Format(_T("      soil_map = %s\n"),
+        QuoteString(input.MAPFILE.soil_map));
+    file.WriteString(line);
+
+    line.Format(_T("      soil_code = %s\n"),
+        QuoteString(input.MAPFILE.soil_code));
+    file.WriteString(line);
+
+    line.Format(_T("      soil_table = %s\n"),
+        QuoteString(input.MAPFILE.soil_table));
+    file.WriteString(line);
+
+    line.Format(_T("      met_map = %s\n"),
+        QuoteString(input.MAPFILE.met_map));
+    file.WriteString(line);
+
+    file.WriteString(_T("/\n\n"));
+
+    // =====================================================
+    // TOPOGRAPHY
+
+    file.WriteString(_T("&TOPOGRAPHY\n"));
+
+    line.Format(_T("      ele0 = %.6f\n"),
+        input.TOPOGRAPHY.ele0);
+    file.WriteString(line);
+
+    line.Format(_T("      slope0 = %.6f\n"),
+        input.TOPOGRAPHY.slope0);
+    file.WriteString(line);
+
+    line.Format(_T("      length0 = %.6f\n"),
+        input.TOPOGRAPHY.length0);
+    file.WriteString(line);
+
+    line.Format(_T("      Ds0 = %.6f\n"),
+        input.TOPOGRAPHY.Ds0);
+    file.WriteString(line);
+
+    line.Format(_T("      deldpth = %.6f\n"),
+        input.TOPOGRAPHY.deldpth);
+    file.WriteString(line);
+
+    line.Format(_T("      zwind0 = %.6f\n"),
+        input.TOPOGRAPHY.zwind0);
+    file.WriteString(line);
+
+    file.WriteString(_T("/\n\n"));
+
+    // =====================================================
+    // INITSOIL
+
+    file.WriteString(_T("&INITSOIL\n"));
+
+    line.Format(_T("      sfcdat = %d\n"),
+        input.INITSOIL.sfcdat);
+    file.WriteString(line);
+
+    line.Format(_T("      vegfromtype = %d\n"),
+        input.INITSOIL.vegfromtype);
+    file.WriteString(line);
+
+    line.Format(_T("      styp = %d\n"),
+        input.INITSOIL.styp);
+    file.WriteString(line);
+
+    line.Format(_T("      vtyp = %d\n"),
+        input.INITSOIL.vtyp);
+    file.WriteString(line);
+
+    line.Format(_T("      lai0 = %.6f\n"),
+        input.INITSOIL.lai0);
+    file.WriteString(line);
+
+    line.Format(_T("      veg0 = %.6f\n"),
+        input.INITSOIL.veg0);
+    file.WriteString(line);
+
+    line.Format(_T("      soilinit = %d\n"),
+        input.INITSOIL.soilinit);
+    file.WriteString(line);
+
+    line.Format(_T("      tslnd0 = %.6f\n"),
+        input.INITSOIL.tslnd0);
+    file.WriteString(line);
+
+    line.Format(_T("      tscanp0 = %.6f\n"),
+        input.INITSOIL.tscanp0);
+    file.WriteString(line);
+
+    line.Format(_T("      tswtr0 = %.6f\n"),
+        input.INITSOIL.tswtr0);
+    file.WriteString(line);
+
+    line.Format(_T("      tsoil0 = %.6f\n"),
+        input.INITSOIL.tsoil0);
+    file.WriteString(line);
+
+    file.WriteString(_T("/\n\n"));
+
+    // =====================================================
+    // LSMMODEL
+
+    file.WriteString(_T("&LSMMODEL\n"));
+
+    line.Format(_T("      rstopt = %d\n"),
+        input.LSMMODEL.rstopt);
+    file.WriteString(line);
+
+    file.WriteString(_T("/\n\n"));
+
+    // =====================================================
+    // MISC
+
+    file.WriteString(_T("&MISC\n"));
+
+    line.Format(_T("      SSTMAX_CALIB = %.6f\n"),
+        input.MISC.SSTMAX_CALIB);
+    file.WriteString(line);
+
+    line.Format(_T("      KSAT1_CALIB = %.6f\n"),
+        input.MISC.KSAT1_CALIB);
+    file.WriteString(line);
+
+    line.Format(_T("      KSAT2_CALIB = %.6f\n"),
+        input.MISC.KSAT2_CALIB);
+    file.WriteString(line);
+
+    file.WriteString(_T("/\n\n"));
+
+    // =====================================================
+    // INPUT
+
+    file.WriteString(_T("&INPUT\n"));
+
+    line.Format(_T("      READ_REL_HUM = %s\n"),
+        ToFortranBool(input.INPUT.READ_REL_HUM));
+    file.WriteString(line);
+
+    line.Format(_T("      UPD_PSFC = %s\n"),
+        ToFortranBool(input.INPUT.UPD_PSFC));
+    file.WriteString(line);
+
+    line.Format(_T("      UPD_TAIR = %s\n"),
+        ToFortranBool(input.INPUT.UPD_TAIR));
+    file.WriteString(line);
+
+    line.Format(_T("      READ_SEPARATE_U_V = %s\n"),
+        ToFortranBool(input.INPUT.READ_SEPARATE_U_V));
+    file.WriteString(line);
+
+    line.Format(_T("      PREFIXES = %s\n"),
+        QuoteString(input.INPUT.PREFIXES));
+    file.WriteString(line);
+
+    line.Format(_T("      PREFIX_RAIN = %s\n"),
+        QuoteString(input.INPUT.PREFIX_RAIN));
+    file.WriteString(line);
+
+    line.Format(_T("      METEO_INPUT_TYPE = %d\n"),
+        input.INPUT.METEO_INPUT_TYPE);
+    file.WriteString(line);
+
+    line.Format(_T("      RAINFALL_INPUT_TYPE = %d\n"),
+        input.INPUT.RAINFALL_INPUT_TYPE);
+    file.WriteString(line);
+
+    line.Format(_T("      MONTHLY_LAIFPAR = %s\n"),
+        ToFortranBool(input.INPUT.MONTHLY_LAIFPAR));
+    file.WriteString(line);
+
+    file.WriteString(_T("/\n\n"));
+
+    // =====================================================
+    // OUTPUT
+
+    file.WriteString(_T("&OUTPUT\n"));
+
+    line.Format(_T("      OUT1_CODESTART = %d\n"),
+        input.OUTPUT.OUT1_CODESTART);
+    file.WriteString(line);
+
+    line.Format(_T("      OUT1_CODEEND = %d\n"),
+        input.OUTPUT.OUT1_CODEEND);
+    file.WriteString(line);
+
+    line.Format(_T("      OUT1_FLOWINT = %d\n"),
+        input.OUTPUT.OUT1_FLOWINT);
+    file.WriteString(line);
+
+    file.WriteString(_T("/\n\n"));
+
+    // =====================================================
+    // DAM_CONTROL
+
+    file.WriteString(_T("&dam_control\n"));
+
+    line.Format(_T("      dam_switch = %d\n"),
+        input.DAM_CONTROL.dam_switch);
+    file.WriteString(line);
+
+    line.Format(_T("      damfile = %s\n"),
+        QuoteString(input.DAM_CONTROL.damfile));
+    file.WriteString(line);
+
+    file.WriteString(_T("/\n\n"));
 
     file.Close();
 
